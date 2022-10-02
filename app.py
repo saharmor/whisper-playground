@@ -8,7 +8,7 @@ import os
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-parser.add_argument("--model", default="tiny", help="Model to use",
+parser.add_argument("--model", default="base", help="Model to use",
                     choices=["tiny", "base", "small", "medium", "large"])
 parser.add_argument("--english", default=True,
                     help="Whether to use English model", type=bool)
@@ -16,19 +16,19 @@ parser.add_argument("--stop_word", default="stop",
                     help="Stop word to abort transcription", type=str)
 parser.add_argument("--verbose", default=False,
                     help="Whether to print verbose output", type=bool)
-parser.add_argument("--energy", default=300,
+parser.add_argument("--energy", default=500,
                     help="Energy level for mic to detect", type=int)
 parser.add_argument("--dynamic_energy", default=False,
                     help="Flag to enable dynamic engergy", type=bool)
 parser.add_argument("--pause", default=0.8,
-                    help="Pause time before entry ends", type=float)
+                    help="Minimum length of silence (sec) that will register as the end of a phrase", type=float)
 args = parser.parse_args()
 
 temp_dir = tempfile.mkdtemp()
 save_path = os.path.join(temp_dir, "temp.wav")
 
 def check_stop_word(predicted_text: str) -> bool:
-    import re, string
+    import re
     pattern = re.compile('[\W_]+', re.UNICODE) 
     return pattern.sub('', predicted_text).lower() == args.stop_word
 
