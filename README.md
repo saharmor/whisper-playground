@@ -1,7 +1,8 @@
 # whisper-playground
 
-It also requires the command-line tool ffmpeg to be installed on your system, which is available from most package managers:
+It also requires the command-line tool [`ffmpeg`](https://ffmpeg.org/) to be installed on your system, which is available from most package managers:
 
+```bash
 # on Ubuntu or Debian
 sudo apt update && sudo apt install ffmpeg
 
@@ -16,3 +17,4 @@ choco install ffmpeg
 
 # on Windows using Scoop (https://scoop.sh/)
 scoop install ffmpeg
+```
