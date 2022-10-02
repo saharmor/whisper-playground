@@ -39,7 +39,7 @@ def transcribe():
         model = model + ".en"
     audio_model = whisper.load_model(model)
 
-    # load the speech recognizer and set the initial energy threshold and pause threshold
+    # load the speech recognizer with CLI settings
     r = sr.Recognizer()
     r.energy_threshold = args.energy
     r.pause_threshold = args.pause
@@ -48,7 +48,7 @@ def transcribe():
     with sr.Microphone(sample_rate=16000) as source:
         print("Say something!")
         while True:
-            #get and save audio to wav file
+            # record audio stream into wav
             audio = r.listen(source)
             data = io.BytesIO(audio.get_wav_data())
             audio_clip = AudioSegment.from_file(data)
@@ -64,7 +64,6 @@ def transcribe():
                 print("You said: " + predicted_text)
             else:
                 print(result)
-            
             
             if check_stop_word(predicted_text):
                 break
