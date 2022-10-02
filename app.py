@@ -11,12 +11,14 @@ parser = argparse.ArgumentParser(
 parser.add_argument("--model", default="tiny", help="Model to use",
                     choices=["tiny", "base", "small", "medium", "large"])
 parser.add_argument("--english", default=True,
-                    help="Whether to use English model", is_flag=True, type=bool)
+                    help="Whether to use English model", type=bool)
+parser.add_argument("--stop_word", default="stop",
+                    help="Stop word to abort transcription", type=str)
 parser.add_argument("--verbose", default=False,
-                    help="Whether to print verbose output", is_flag=True, type=bool)
+                    help="Whether to print verbose output", type=bool)
 parser.add_argument("--energy", default=300,
                     help="Energy level for mic to detect", type=int)
-parser.add_argument("--dynamic_energy", default=False, is_flag=True,
+parser.add_argument("--dynamic_energy", default=False,
                     help="Flag to enable dynamic engergy", type=bool)
 parser.add_argument("--pause", default=0.8,
                     help="Pause time before entry ends", type=float)
@@ -25,8 +27,13 @@ args = parser.parse_args()
 temp_dir = tempfile.mkdtemp()
 save_path = os.path.join(temp_dir, "temp.wav")
 
+def check_stop_word(predicted_text: str) -> bool:
+    import re, string
+    pattern = re.compile('[\W_]+', re.UNICODE) 
+    return pattern.sub('', predicted_text).lower() == args.stop_word
 
 def transcribe():
+    model = args.model
     # there are no english models for large
     if args.model != "large" and args.english:
         model = model + ".en"
@@ -57,7 +64,12 @@ def transcribe():
                 print("You said: " + predicted_text)
             else:
                 print(result)
+            
+            
+            if check_stop_word(predicted_text):
+                break
 
 
 if __name__ == "__main__":
     transcribe()
+    print("\n--> How cool was this?!")
