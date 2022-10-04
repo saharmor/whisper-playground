@@ -9,7 +9,6 @@ import SettingsSections from "./SettingsSection";
 import { ReactMic } from 'react-mic';
 import axios from "axios";
 import { PulseLoader } from "react-spinners";
-import _ from 'lodash';
 
 const useStyles = () => ({
   root: {
@@ -38,7 +37,7 @@ const useStyles = () => ({
 
 const App = ({ classes }) => {
   const [transcribedData, setTranscribedData] = useState([]);
-  const [interimTranscribedData, setInterimTranscribedData] = useState('');
+  const [interimTranscribedData, ] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(0);
