@@ -12,8 +12,8 @@ CORS(app)
 @app.route('/transcribe', methods=['POST'])
 def transcribe():
     if request.method == 'POST':
-        language = 'english'
-        model = 'base'
+        language = request.form['language']
+        model = request.form['model_size']
 
         # there are no english models for large
         if model != 'large' and language == 'english':

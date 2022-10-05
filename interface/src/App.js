@@ -41,6 +41,7 @@ const App = ({ classes }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(0);
+  const [selectedModel, setSelectedModel] = useState(1);
   const [transcribeTimeout, setTranscribeTimout] = useState(3);
   const [stopTranscriptionSession, setStopTranscriptionSession] = useState(false);  
 
@@ -48,7 +49,8 @@ const App = ({ classes }) => {
   const stopTranscriptionSessionRef = useRef(stopTranscriptionSession);
   stopTranscriptionSessionRef.current = stopTranscriptionSession;
 
-  const supportedLanguages = ['English', 'German', 'French', 'Spanish']
+  const supportedLanguages = ['English', 'German', 'French', 'Spanish', 'Hebrew']
+  const modelOptions = ['tiny', 'base', 'small', 'medium', 'large']
 
   useEffect(() => {
     return () => clearInterval(intervalRef.current);
@@ -91,6 +93,8 @@ const App = ({ classes }) => {
       "content-type": "multipart/form-data",
     };
     const formData = new FormData();
+    formData.append("language", supportedLanguages[selectedLanguage])
+    formData.append("model_size", modelOptions[selectedModel])
     formData.append("audio_data", recordedBlob.blob, 'temp_recording');
     axios.post("http://0.0.0.0:8000/transcribe", formData, { headers })
       .then((res) => {
@@ -116,8 +120,8 @@ const App = ({ classes }) => {
       </div>
       <div className={classes.settingsSection}>
         <SettingsSections disabled={isTranscribing || isRecording} possibleLanguages={supportedLanguages} selectedLanguage={selectedLanguage}
-          onLanguageChanged={setSelectedLanguage} transcribeTimeout={transcribeTimeout}
-          onTranscribeTiemoutChanged={handleTranscribeTimeoutChange} />
+          onLanguageChange={setSelectedLanguage} modelOptions={modelOptions} selectedModel={selectedModel} onModelChange={setSelectedModel}
+          transcribeTimeout={transcribeTimeout} onTranscribeTiemoutChanged={handleTranscribeTimeoutChange} />
       </div>
       <div className={classes.buttonsSection} >
         {!isRecording && !isTranscribing && <Button onClick={startRecording} variant="primary">Start transcribing</Button>}

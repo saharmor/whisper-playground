@@ -7,11 +7,15 @@ import {
   InputLabel
 } from "@material-ui/core";
 
-const SettingsSections = ({ disabled, possibleLanguages, selectedLanguage, onLanguageChanged,
-  transcribeTimeout, onTranscribeTiemoutChanged }) => {
+const SettingsSections = ({ disabled, possibleLanguages, selectedLanguage, onLanguageChange,
+  modelOptions, selectedModel, onModelChange, transcribeTimeout, onTranscribeTiemoutChanged }) => {
 
   function onLangChangedLocal(event) {
-    onLanguageChanged(event.target.value)
+    onLanguageChange(event.target.value)
+  }
+
+  function onModelChangeLocal(event) {
+    onModelChange(event.target.value)
   }
 
   function onTranscribeTiemoutChangedLocal(event) {
@@ -20,6 +24,16 @@ const SettingsSections = ({ disabled, possibleLanguages, selectedLanguage, onLan
 
   return (
     <Grid container spacing={2} direction="row" justifyContent="center" alignItems="center">
+      <Grid item>
+        <FormControl variant="standard" sx={{ m: 2, minWidth: 220 }}>
+          <InputLabel id="model-select-label">Model size</InputLabel>
+          <Select labelId="model-select-label" value={selectedModel} onChange={onModelChangeLocal} disabled={disabled}>
+            {Object.keys(modelOptions).map((model) => {
+              return <MenuItem key={model} value={model}>{modelOptions[model]}</MenuItem>
+            })}
+          </Select>
+        </FormControl>
+      </Grid>
       <Grid item>
         <FormControl variant="standard" sx={{ m: 1, minWidth: 220 }}>
           <InputLabel id="language-select-label">Language</InputLabel>
