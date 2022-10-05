@@ -20,7 +20,7 @@ const useStyles = () => ({
     flexDirection: 'column',
   },
   title: {
-    marginBottom: '20px',
+    marginBottom: '30px',
   },
   settingsSection: {
     marginBottom: '20px',
