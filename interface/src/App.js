@@ -56,7 +56,7 @@ const App = ({ classes }) => {
   const selectedModelRef = useRef(selectedModel);
   selectedModelRef.current = selectedModel;
 
-  const supportedLanguages = ['English', 'German', 'French', 'Spanish', 'Hebrew']
+  const supportedLanguages = ['English', 'German', 'French', 'Spanish', 'Hebrew', 'Russian']
   const modelOptions = ['tiny', 'base', 'small', 'medium', 'large']
 
   useEffect(() => {
