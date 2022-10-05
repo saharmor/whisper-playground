@@ -42,12 +42,19 @@ const App = ({ classes }) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState(0);
   const [selectedModel, setSelectedModel] = useState(1);
-  const [transcribeTimeout, setTranscribeTimout] = useState(3);
+  const [transcribeTimeout, setTranscribeTimout] = useState(5);
   const [stopTranscriptionSession, setStopTranscriptionSession] = useState(false);  
 
   const intervalRef = useRef(null);
+  
   const stopTranscriptionSessionRef = useRef(stopTranscriptionSession);
   stopTranscriptionSessionRef.current = stopTranscriptionSession;
+
+  const selectedLangRef = useRef(selectedLanguage);
+  selectedLangRef.current = selectedLanguage;
+
+  const selectedModelRef = useRef(selectedModel);
+  selectedModelRef.current = selectedModel;
 
   const supportedLanguages = ['English', 'German', 'French', 'Spanish', 'Hebrew']
   const modelOptions = ['tiny', 'base', 'small', 'medium', 'large']
@@ -93,8 +100,8 @@ const App = ({ classes }) => {
       "content-type": "multipart/form-data",
     };
     const formData = new FormData();
-    formData.append("language", supportedLanguages[selectedLanguage])
-    formData.append("model_size", modelOptions[selectedModel])
+    formData.append("language", supportedLanguages[selectedLangRef.current])
+    formData.append("model_size", modelOptions[selectedModelRef.current])
     formData.append("audio_data", recordedBlob.blob, 'temp_recording');
     axios.post("http://0.0.0.0:8000/transcribe", formData, { headers })
       .then((res) => {
@@ -108,9 +115,6 @@ const App = ({ classes }) => {
       }
   }
 
-  function shouldShowStopBtn(){
-    return (isRecording || isTranscribing) // && !stopTranscriptionSessionRef.current
-  }
   return (
     <div className={classes.root}>
       <div className={classes.title}>
@@ -125,7 +129,7 @@ const App = ({ classes }) => {
       </div>
       <div className={classes.buttonsSection} >
         {!isRecording && !isTranscribing && <Button onClick={startRecording} variant="primary">Start transcribing</Button>}
-        {shouldShowStopBtn() && <Button onClick={stopRecording} variant="danger" disabled={stopTranscriptionSessionRef.current}>Stop</Button>}
+        {(isRecording || isTranscribing) && <Button onClick={stopRecording} variant="danger" disabled={stopTranscriptionSessionRef.current}>Stop</Button>}
       </div>
 
       <div className="recordIllustration">
