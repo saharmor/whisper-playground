@@ -32,3 +32,6 @@ scoop install ffmpeg
 3. Install the backend and frontend environmet `sh install_playground.sh`
 4. Run the backend `cd backend && source venv/bin/activate && flask run --port 8000`
 5. In a different terminal, run the React frontend `cd interface && yarn start`
+
+# License
+This repository and the code and model weights of Whisper are released under the MIT License.
