@@ -5,6 +5,9 @@
 </div>
 
 
+https://user-images.githubusercontent.com/6180201/194214114-1f9684ab-b2e2-4bd5-b905-453930cf9d67.mp4
+
+
 # Setup
 1. Whisper requires the command-line tool [`ffmpeg`](https://ffmpeg.org/) to be installed on your system, which is available from most package managers:
 ```bash
