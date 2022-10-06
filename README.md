@@ -5,15 +5,8 @@
 </div>
 
 
-# Local development
-1. Clone or fork this repository
-2. Install the backend and frontend environmet `sh install_playground.sh`
-3. Run the backend `cd backend && source venv/bin/activate && flask run --port 8000`
-4. In a different terminal, run the React frontend `cd interface && yarn start`
-
-
-Whisper requires the command-line tool [`ffmpeg`](https://ffmpeg.org/) to be installed on your system, which is available from most package managers:
-
+# Setup
+1. Whisper requires the command-line tool [`ffmpeg`](https://ffmpeg.org/) to be installed on your system, which is available from most package managers:
 ```bash
 # on Ubuntu or Debian
 sudo apt update && sudo apt install ffmpeg
@@ -30,3 +23,8 @@ choco install ffmpeg
 # on Windows using Scoop (https://scoop.sh/)
 scoop install ffmpeg
 ```
+
+2. Clone or fork this repository
+3. Install the backend and frontend environmet `sh install_playground.sh`
+4. Run the backend `cd backend && source venv/bin/activate && flask run --port 8000`
+5. In a different terminal, run the React frontend `cd interface && yarn start`
