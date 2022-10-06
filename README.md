@@ -1,6 +1,18 @@
-# whisper-playground
+<p align="center">
+  <img width="60px" src="https://user-images.githubusercontent.com/6180201/124313197-cc93f200-db70-11eb-864a-fc65765fc038.png" alt="giant microphone"/>   <br/>
+  <h2 align="center">Whisper Playground</h2>
+  <h6 align="center">Instantly build speech2text apps using OpenAI's Whisper</h6>
+</div>
 
-It also requires the command-line tool [`ffmpeg`](https://ffmpeg.org/) to be installed on your system, which is available from most package managers:
+
+# Local development
+1. Clone or fork this repository
+2. Install the backend and frontend environmet `sh install_playground.sh`
+3. Run the backend `cd backend && source venv/bin/activate && flask run --port 8000`
+4. In a different terminal, run the React frontend `cd interface && yarn start`
+
+
+Whisper requires the command-line tool [`ffmpeg`](https://ffmpeg.org/) to be installed on your system, which is available from most package managers:
 
 ```bash
 # on Ubuntu or Debian
