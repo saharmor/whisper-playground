@@ -40,7 +40,7 @@ const App = ({ classes }) => {
   const [interimTranscribedData, ] = useState('');
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
-  const [selectedLanguage, setSelectedLanguage] = useState(0);
+  const [selectedLanguage, setSelectedLanguage] = useState('english');
   const [selectedModel, setSelectedModel] = useState(1);
   const [transcribeTimeout, setTranscribeTimout] = useState(5);
   const [stopTranscriptionSession, setStopTranscriptionSession] = useState(false);  
@@ -56,7 +56,8 @@ const App = ({ classes }) => {
   const selectedModelRef = useRef(selectedModel);
   selectedModelRef.current = selectedModel;
 
-  const supportedLanguages = ['English', 'German', 'French', 'Spanish', 'Hebrew', 'Russian']
+  const supportedLanguages = ['english', 'chinese', 'german', 'spanish', 'russian', 'korean', 'french', 'japanese', 'portuguese', 'turkish', 'polish', 'catalan', 'dutch', 'arabic', 'swedish', 'italian', 'indonesian', 'hindi', 'finnish', 'vietnamese', 'hebrew', 'ukrainian', 'greek', 'malay', 'czech', 'romanian', 'danish', 'hungarian', 'tamil', 'norwegian', 'thai', 'urdu', 'croatian', 'bulgarian', 'lithuanian', 'latin', 'maori', 'malayalam', 'welsh', 'slovak', 'telugu', 'persian', 'latvian', 'bengali', 'serbian', 'azerbaijani', 'slovenian', 'kannada', 'estonian', 'macedonian', 'breton', 'basque', 'icelandic', 'armenian', 'nepali', 'mongolian', 'bosnian', 'kazakh', 'albanian', 'swahili', 'galician', 'marathi', 'punjabi', 'sinhala', 'khmer', 'shona', 'yoruba', 'somali', 'afrikaans', 'occitan', 'georgian', 'belarusian', 'tajik', 'sindhi', 'gujarati', 'amharic', 'yiddish', 'lao', 'uzbek', 'faroese', 'haitian creole', 'pashto', 'turkmen', 'nynorsk', 'maltese', 'sanskrit', 'luxembourgish', 'myanmar', 'tibetan', 'tagalog', 'malagasy', 'assamese', 'tatar', 'hawaiian', 'lingala', 'hausa', 'bashkir', 'javanese', 'sundanese']
+
   const modelOptions = ['tiny', 'base', 'small', 'medium', 'large']
 
   useEffect(() => {
@@ -100,7 +101,7 @@ const App = ({ classes }) => {
       "content-type": "multipart/form-data",
     };
     const formData = new FormData();
-    formData.append("language", supportedLanguages[selectedLangRef.current])
+    formData.append("language", selectedLangRef.current)
     formData.append("model_size", modelOptions[selectedModelRef.current])
     formData.append("audio_data", recordedBlob.blob, 'temp_recording');
     axios.post("http://0.0.0.0:8000/transcribe", formData, { headers })

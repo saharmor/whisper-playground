@@ -1,18 +1,13 @@
 import React from "react";
+import { Grid, FormControl, InputLabel } from "@material-ui/core";
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-import {
-  Grid, FormControl,
-  InputLabel
-} from "@material-ui/core";
+import Autocomplete from '@material-ui/lab/Autocomplete';
+
 
 const SettingsSections = ({ disabled, possibleLanguages, selectedLanguage, onLanguageChange,
   modelOptions, selectedModel, onModelChange, transcribeTimeout, onTranscribeTiemoutChanged }) => {
-
-  function onLangChangedLocal(event) {
-    onLanguageChange(event.target.value)
-  }
 
   function onModelChangeLocal(event) {
     onModelChange(event.target.value)
@@ -35,13 +30,12 @@ const SettingsSections = ({ disabled, possibleLanguages, selectedLanguage, onLan
         </FormControl>
       </Grid>
       <Grid item>
-        <FormControl variant="standard" sx={{ m: 1, minWidth: 220 }}>
-          <InputLabel id="language-select-label">Language</InputLabel>
-          <Select labelId="language-select-label" value={selectedLanguage} onChange={onLangChangedLocal} disabled={disabled}>
-            {Object.keys(possibleLanguages).map((language) => {
-              return <MenuItem key={language} value={language}>{possibleLanguages[language]}</MenuItem>
-            })}
-          </Select>
+        <FormControl variant="standard" style={{ minWidth: 120 }}>
+          <Autocomplete id="language-select" disableClearable options={possibleLanguages} getOptionLabel={(option) => option}
+            disabled={disabled} value={selectedLanguage} onChange={(event, newValue) => {
+              onLanguageChange(newValue);
+            }}
+            renderInput={(params) => <TextField {...params} label="Language" />} />
         </FormControl>
       </Grid>
       <Grid item xs={1}>
