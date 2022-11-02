@@ -64,6 +64,7 @@ def transcribe():
                 predicted_text = result["text"]
                 print("Text: " + predicted_text)
             else:
+                predicted_text = result["text"]
                 print(result)
             
             if check_stop_word(predicted_text):
