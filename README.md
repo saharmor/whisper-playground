@@ -7,7 +7,6 @@
 
 https://user-images.githubusercontent.com/6180201/194214280-3a4106d5-53cf-4463-ba0e-201d8e1b0c0e.mp4
 
-
 # Contribution ideas
 - [ ] Stream audio using web sockets over the current approach of incrementally sending audio chunks
 - [ ] Implement diarization (speaker identification) using `pyannote-audio` ([example](https://github.com/openai/whisper/discussions/264))
@@ -17,12 +16,14 @@ https://user-images.githubusercontent.com/6180201/194214280-3a4106d5-53cf-4463-b
 ```bash
 # on Ubuntu or Debian
 sudo apt update && sudo apt install ffmpeg
+sudo apt install portaudio19-dev
 
 # on Arch Linux
 sudo pacman -S ffmpeg
 
 # on MacOS using Homebrew (https://brew.sh/)
 brew install ffmpeg
+brew install portaudio
 
 # on Windows using Chocolatey (https://chocolatey.org/)
 choco install ffmpeg
