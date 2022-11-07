@@ -20,6 +20,7 @@ sudo apt install portaudio19-dev
 
 # on Arch Linux
 sudo pacman -S ffmpeg
+sudo pacman -S portaudio
 
 # on MacOS using Homebrew (https://brew.sh/)
 brew install ffmpeg
