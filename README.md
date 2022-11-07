@@ -12,7 +12,7 @@ https://user-images.githubusercontent.com/6180201/194214280-3a4106d5-53cf-4463-b
 - [ ] Implement diarization (speaker identification) using `pyannote-audio` ([example](https://github.com/openai/whisper/discussions/264))
 
 # Setup
-1. Whisper requires the command-line tool [`ffmpeg`](https://ffmpeg.org/) to be installed on your system, which is available from most package managers:
+1. Whisper requires the command-line tool [`ffmpeg`](https://ffmpeg.org/) and [`portaudio`](http://portaudio.com/docs/v19-doxydocs/index.html) to be installed on your system, which is available from most package managers:
 ```bash
 # on Ubuntu or Debian
 sudo apt update && sudo apt install ffmpeg
