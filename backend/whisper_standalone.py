@@ -5,6 +5,7 @@ import speech_recognition as sr
 import whisper
 import tempfile
 import os
+from time import perf_counter
 
 parser = argparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -51,6 +52,7 @@ def transcribe():
         while True:
             # record audio stream into wav
             audio = r.listen(source)
+            start = perf_counter()
             data = io.BytesIO(audio.get_wav_data())
             audio_clip = AudioSegment.from_file(data)
             audio_clip.export(save_path, format="wav")
@@ -64,7 +66,12 @@ def transcribe():
                 predicted_text = result["text"]
                 print("Text: " + predicted_text)
             else:
-                print(result)
+                predicted_text = result["text"]
+                end = perf_counter()
+                duration = end-start
+                for k,v in result.items():
+                    print(k,v)
+                print("Processing delay: ", duration)
             
             if check_stop_word(predicted_text):
                 break
