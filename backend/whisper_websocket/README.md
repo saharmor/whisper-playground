@@ -1,6 +1,6 @@
-# Live Transcription With Python and FastAPI
+# Live Transcription With FastAPI and Whisper
 
-To run this project create a virtual environment by running the below commands. You can learn more about setting up a virtual environment in this [article](https://developers.deepgram.com/blog/2022/02/python-virtual-environments/). 
+To run this project create a virtual environment by running the below commands. 
 
 ```
 mkdir [% NAME_OF_YOUR_DIRECTORY %]
@@ -24,4 +24,6 @@ uvicorn main:app --reload
 Pull up a browser and go to your localhost, http://127.0.0.1:8000/.
 
 Allow access to your microphone and start speaking. A transcript of your audio will appear in the browser. 
+
+Note the microphone noise threshold can be tuned by changing the rms_increase parameter in main.py
 
