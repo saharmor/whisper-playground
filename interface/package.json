@@ -16,7 +16,9 @@
     "react-dom": "^18.2.0",
     "react-mic": "^12.4.6",
     "react-scripts": "^3.4.1",
-    "react-spinners": "^0.10.6"
+    "react-spinners": "^0.10.6",
+    "socket.io-client": "^4.5.4",
+    "websocket": "^1.0.34"
   },
   "scripts": {
     "start": "react-scripts start",
