@@ -2,8 +2,8 @@
   <img width="60px" src="https://user-images.githubusercontent.com/6180201/124313197-cc93f200-db70-11eb-864a-fc65765fc038.png" alt="giant microphone"/>   <br/>
   <h2 align="center">Whisper Playground</h2>
   <h6 align="center">Instantly build speech2text apps in 99 languages using OpenAI's Whisper</h6>
+  <h6 align="center"> Live demo https://whisperui.monsterapi.ai</h6>
 </div>
-
 
 https://user-images.githubusercontent.com/6180201/194214280-3a4106d5-53cf-4463-ba0e-201d8e1b0c0e.mp4
 
