@@ -104,7 +104,7 @@ const App = ({ classes }) => {
     formData.append("language", selectedLangRef.current)
     formData.append("model_size", modelOptions[selectedModelRef.current])
     formData.append("audio_data", recordedBlob.blob, 'temp_recording');
-    axios.post("http://0.0.0.0:8000/transcribe", formData, { headers })
+    axios.post("/transcribe", formData, { headers })
       .then((res) => {
         setTranscribedData(oldData => [...oldData, res.data])
         setIsTranscribing(false)

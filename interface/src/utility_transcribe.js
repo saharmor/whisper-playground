@@ -45,7 +45,7 @@ let RecorderObj = {
     const config = {
       headers: { 'content-type': 'multipart/form-data' }
     }
-    axios.post('http://localhost:8000/transcribe/', data, config);
+    axios.post('/transcribe', data, config);
   },
 
   stopRecording: function () {
