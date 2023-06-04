@@ -12,7 +12,6 @@ https://user-images.githubusercontent.com/6180201/194214280-3a4106d5-53cf-4463-b
 
 
 # Contribution ideas
-- [ ] Package into a Docker file
 - [ ] Stream audio using web sockets over the current approach of incrementally sending audio chunks
 - [ ] Implement diarization (speaker identification) using `pyannote-audio` ([example](https://github.com/openai/whisper/discussions/264))
 
