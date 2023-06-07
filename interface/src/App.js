@@ -9,6 +9,7 @@ import SettingsSections from "./SettingsSection";
 import { ReactMic } from 'react-mic';
 import axios from "axios";
 import { PulseLoader } from "react-spinners";
+import { w3cwebsocket as W3CWebSocket } from "websocket";
 
 const useStyles = () => ({
   root: {
@@ -34,6 +35,7 @@ const useStyles = () => ({
     width: '100px',
   }
 });
+const socket = new W3CWebSocket('ws://localhost:8000/listen')
 
 const App = ({ classes }) => {
   const [transcribedData, setTranscribedData] = useState([]);
@@ -42,7 +44,7 @@ const App = ({ classes }) => {
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState('english');
   const [selectedModel, setSelectedModel] = useState(1);
-  const [transcribeTimeout, setTranscribeTimout] = useState(5);
+  const [transcribeTimeout, setTranscribeTimout] = useState(600);
   const [stopTranscriptionSession, setStopTranscriptionSession] = useState(false);  
 
   const intervalRef = useRef(null);
@@ -59,6 +61,29 @@ const App = ({ classes }) => {
   const supportedLanguages = ['english', 'chinese', 'german', 'spanish', 'russian', 'korean', 'french', 'japanese', 'portuguese', 'turkish', 'polish', 'catalan', 'dutch', 'arabic', 'swedish', 'italian', 'indonesian', 'hindi', 'finnish', 'vietnamese', 'hebrew', 'ukrainian', 'greek', 'malay', 'czech', 'romanian', 'danish', 'hungarian', 'tamil', 'norwegian', 'thai', 'urdu', 'croatian', 'bulgarian', 'lithuanian', 'latin', 'maori', 'malayalam', 'welsh', 'slovak', 'telugu', 'persian', 'latvian', 'bengali', 'serbian', 'azerbaijani', 'slovenian', 'kannada', 'estonian', 'macedonian', 'breton', 'basque', 'icelandic', 'armenian', 'nepali', 'mongolian', 'bosnian', 'kazakh', 'albanian', 'swahili', 'galician', 'marathi', 'punjabi', 'sinhala', 'khmer', 'shona', 'yoruba', 'somali', 'afrikaans', 'occitan', 'georgian', 'belarusian', 'tajik', 'sindhi', 'gujarati', 'amharic', 'yiddish', 'lao', 'uzbek', 'faroese', 'haitian creole', 'pashto', 'turkmen', 'nynorsk', 'maltese', 'sanskrit', 'luxembourgish', 'myanmar', 'tibetan', 'tagalog', 'malagasy', 'assamese', 'tatar', 'hawaiian', 'lingala', 'hausa', 'bashkir', 'javanese', 'sundanese']
 
   const modelOptions = ['tiny', 'base', 'small', 'medium', 'large', 'large-v1']
+
+
+  socket.onopen = () => {
+      console.log({ event: 'onopen' })
+  };
+
+  socket.onmessage = (message) => {
+      const received = message.data
+      if (received) {
+          console.log(received)
+          setTranscribedData(oldData => [...oldData, <br></br>, received])
+      }
+ }
+
+  socket.onclose = () => {
+    console.log({ event: 'onclose' })
+  }
+
+  socket.onerror = (error) => {
+      console.log({ event: 'onerror', error })
+  }
+
+
 
   useEffect(() => {
     return () => clearInterval(intervalRef.current);
@@ -83,7 +108,7 @@ const App = ({ classes }) => {
   }
 
   function onData(recordedBlob) {
-    // console.log('chunk of real-time data is: ', recordedBlob);
+    socket.send(recordedBlob)// console.log('chunk of real-time data is: ', recordedBlob);
   }
 
   function onStop(recordedBlob) {
@@ -106,7 +131,7 @@ const App = ({ classes }) => {
     formData.append("audio_data", recordedBlob.blob, 'temp_recording');
     axios.post("http://0.0.0.0:8000/transcribe", formData, { headers })
       .then((res) => {
-        setTranscribedData(oldData => [...oldData, res.data])
+        setTranscribedData(oldData => [...oldData, <br></br>, res.data])
         setIsTranscribing(false)
         intervalRef.current = setInterval(transcribeInterim, transcribeTimeout * 1000)
       });
@@ -120,7 +145,7 @@ const App = ({ classes }) => {
     <div className={classes.root}>
       <div className={classes.title}>
         <Typography variant="h3">
-          Whisper Playground <span role="img" aria-label="microphone-emoji">🎤</span>
+          Whisper Playground! <span role="img" aria-label="microphone-emoji">🎤</span>
         </Typography>
       </div>
       <div className={classes.settingsSection}>
@@ -134,8 +159,8 @@ const App = ({ classes }) => {
       </div>
 
       <div className="recordIllustration">
-        <ReactMic record={isRecording} className="sound-wave" onStop={onStop}
-          onData={onData} strokeColor="#0d6efd" backgroundColor="#f6f6ef" />
+        <ReactMic record={isRecording} className="sound-wave" onStop={onStop} sampleRate={16000}
+          onData={onData} strokeColor="#0d6efd" backgroundColor="#f6f6ef" timeSlice={5000}/>
       </div>
 
       <div>
