@@ -1,9 +1,3 @@
-aiohttp
-python-socketio
-numpy
-https://github.com/pyannote/pyannote-audio/archive/refs/heads/develop.zip
-rx
-sounddevice
-websocket-server
-git+https://github.com/linto-ai/whisper-timestamped
 diart
+python-socketio
+git+https://github.com/linto-ai/whisper-timestamped
