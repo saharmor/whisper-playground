@@ -16,7 +16,10 @@
     "react-dom": "^18.2.0",
     "react-mic": "^12.4.6",
     "react-scripts": "^3.4.1",
-    "react-spinners": "^0.10.6"
+    "react-spinners": "^0.10.6",
+    "react-wavesurfer": "^0.8.6",
+    "socket.io-client": "^4.7.1",
+    "wavesurfer.js": "^7.0.3"
   },
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",
