@@ -27,6 +27,7 @@ class Client:
         self.transcription_thread = None
         self.chunk_receiving_thread = None
         self.disconnected = False
+        self.ending_stream = False
 
         self.initialize_transcriber()
 
@@ -56,18 +57,20 @@ class Client:
         logging.info("Stream start signaled to client")
 
     async def stop_transcribing(self):
+        self.ending_stream = True
         self.audio_chunks.put(None)
         self.transcription_thread.join()
-        logging.info("Transcription thread closed due to completion")
+        logging.info("Transcription thread closed due to completion (stream ended)")
         await self.socket.emit("whisperingStopped")
         logging.info("Stream end signaled to client")
 
     def handle_disconnection(self):
         logging.info("Starting disconnection process, no longer sending transcriptions to client")
         self.disconnected = True
-        self.audio_chunks.put(None)
-        self.transcription_thread.join()
-        logging.info("Transcription thread closed due to disconnection")
+        if not self.ending_stream:
+            self.audio_chunks.put(None)
+            self.transcription_thread.join()
+            logging.info("Transcription thread closed due to disconnection")
 
     async def send_transcription(self, transcription):
         logging.info(f"Transcription generated: {transcription}")
@@ -79,10 +82,6 @@ class Client:
 
     def receive_chunk(self, chunk):
         self.source.receive_chunk(chunk)
-
-    def get_source(self):
-        return self.source
-
     def complete_stream(self):
         self.source.stream.on_completed()
         logging.info("Stream source signaled completion")
@@ -132,3 +131,6 @@ class Client:
         # Dispose the stream after pipeline completion and the thread will finish executing
         stream.dispose()
         logging.info("Stream disposed")
+
+    def is_ending_stream(self):
+        return self.ending_stream

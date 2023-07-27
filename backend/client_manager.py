@@ -1,5 +1,7 @@
 from client import Client
 import logging
+import asyncio
+import threading
 
 
 class ClientManager:
@@ -7,11 +9,18 @@ class ClientManager:
     def __init__(self):
         self.clients = {}
 
-    async def start_stream(self, sid, sio, config):
-        if sid not in self.clients.keys():
-            new_client = Client(sid=sid, socket=sio, config=config)
+    async def create_new_client(self, sid, sio, config):
+        self.clients[sid] = "initializing"
+        new_client = Client(sid=sid, socket=sio, config=config)
+        if self.clients.get(sid):
             self.clients[sid] = new_client
             await new_client.start_transcribing()
+        else:
+            logging.warning("Client removed before transcription could start")
+
+    async def start_stream(self, sid, sio, config):
+        if sid not in self.clients.keys():
+            threading.Thread(target=asyncio.run, args=(self.create_new_client(sid, sio, config),)).start()
         else:
             logging.warning("A streaming client tried to initiate another stream")
             await sio.emit("clientAlreadyStreaming")
@@ -31,12 +40,14 @@ class ClientManager:
     def disconnect_from_stream(self, sid):
         if sid in self.clients.keys():
             client = self.clients[sid]
-            client.handle_disconnection()
-            try:
-                self.clients.pop(sid)
-            except KeyError:
-                logging.warning("disconnected_from_stream attempted to remove an already removed client")
-            logging.info("Disconnected client removed")
+            if client != "initializing":
+                client.handle_disconnection()
+            if not client.is_ending_stream():
+                try:
+                    self.clients.pop(sid)
+                except KeyError:
+                    logging.warning("disconnected_from_stream attempted to remove an already removed client")
+                logging.info("Disconnected client removed")
         else:
             logging.warning("A non-existent client tried to disconnect from the stream.")
 
