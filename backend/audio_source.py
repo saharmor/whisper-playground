@@ -1,6 +1,7 @@
 from diart.sources import AudioSource
 from config import SAMPLE_RATE
 from diart.utils import decode_audio
+import logging
 
 
 class StreamingSocketAudioSource(AudioSource):
@@ -10,3 +11,4 @@ class StreamingSocketAudioSource(AudioSource):
 
     def receive_chunk(self, chunk):
         self.stream.on_next(decode_audio(chunk))
+        logging.debug("Chunk received in stream")

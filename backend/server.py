@@ -1,6 +1,6 @@
 from aiohttp import web
 import socketio
-from whisprer import Whisprer
+from client_manager import ClientManager
 import logging
 
 # Configure logging settings
@@ -11,7 +11,7 @@ sio = socketio.AsyncServer(cors_allowed_origins=[])
 app = web.Application()
 sio.attach(app)
 
-whisprer = Whisprer()
+whisprer = ClientManager()
 
 
 @sio.on("connect")

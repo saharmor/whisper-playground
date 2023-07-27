@@ -1,6 +1,6 @@
 export const MIC_SAMPLE_RATE = 16000;
 export const BLOCK_SIZE = 8192;
-export const MODEL_OPTIONS = [
+export const WHISPER_MODEL_OPTIONS = [
   "tiny",
   "base",
   "small",

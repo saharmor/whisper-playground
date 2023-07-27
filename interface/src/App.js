@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import { Button } from "react-bootstrap";
 import withStyles from "@material-ui/core/styles/withStyles";
 import Typography from "@material-ui/core/Typography";
@@ -6,10 +6,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import TranscribeOutput from "./TranscribeOutput";
 import SettingsSections from "./SettingsSection";
+import ErrorMessage from "./ErrorMessage";
 import {
   MIC_SAMPLE_RATE,
   BLOCK_SIZE,
-  MODEL_OPTIONS,
+  WHISPER_MODEL_OPTIONS,
   SUPPORTED_LANGUAGES,
 } from "./config";
 import WaveformVisualizer from "./WaveformVisualizer";
@@ -54,16 +55,13 @@ const App = ({ classes }) => {
   const [isStreamPending, setIsStreamPending] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("english");
   const [selectedModel, setSelectedModel] = useState("small");
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const socketRef = useRef(null);
 
   const audioContextRef = useRef(null);
 
   const streamRef = useRef(null);
-
-  useEffect(() => {
-    console.log(selectedModel);
-  }, [selectedModel]);
 
   function b64encode(chunk) {
     // Convert the chunk array to a Float32Array
@@ -80,7 +78,7 @@ const App = ({ classes }) => {
     setTranscribedData((prevData) => [...prevData, ...data]);
   }
 
-  function startRecording() {
+  function startStream() {
     setIsStreamPending(true);
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -124,6 +122,15 @@ const App = ({ classes }) => {
           };
         });
 
+        socketRef.current.on("clientAlreadyStreaming", () => {
+          setErrorMessage(
+            "You are already streaming, wait for the current stream to end"
+          );
+          stopRecording();
+          setIsRecording(false);
+          setIsStreamPending(false);
+        });
+
         socketRef.current.on(
           "transcriptionDataAvailable",
           (transcriptionData) => {
@@ -134,14 +141,21 @@ const App = ({ classes }) => {
       })
       .catch(function (error) {
         console.error("Error getting microphone input:", error);
+        setErrorMessage("Microphone not working");
+        setIsStreamPending(false);
+        setIsRecording(false);
       });
   }
 
   function stopRecording() {
-    setIsStreamPending(true);
-    socketRef.current.emit("stopWhispering");
     streamRef.current.getTracks().forEach((track) => track.stop());
     audioContextRef.current.close();
+  }
+
+  function stopStream() {
+    setIsStreamPending(true);
+    socketRef.current.emit("stopWhispering");
+    stopRecording();
     setAudioData([]);
     socketRef.current.on("whisperingStopped", function () {
       setIsStreamPending(false);
@@ -167,15 +181,21 @@ const App = ({ classes }) => {
           possibleLanguages={SUPPORTED_LANGUAGES}
           selectedLanguage={selectedLanguage}
           onLanguageChange={setSelectedLanguage}
-          modelOptions={MODEL_OPTIONS}
+          modelOptions={WHISPER_MODEL_OPTIONS}
           selectedModel={selectedModel}
           onModelChange={setSelectedModel}
         />
       </div>
+      {errorMessage && (
+        <ErrorMessage
+          message={errorMessage}
+          setErrorMessage={setErrorMessage}
+        />
+      )}
       <div className={classes.buttonsSection}>
         {!isRecording && (
           <Button
-            onClick={startRecording}
+            onClick={startStream}
             disabled={isStreamPending}
             variant="primary"
           >
@@ -184,7 +204,7 @@ const App = ({ classes }) => {
         )}
         {isRecording && (
           <Button
-            onClick={stopRecording}
+            onClick={stopStream}
             variant="danger"
             disabled={isStreamPending}
           >

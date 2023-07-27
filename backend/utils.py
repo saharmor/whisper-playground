@@ -2,7 +2,7 @@ import numpy as np
 from pyannote.core import Annotation, SlidingWindowFeature, SlidingWindow
 
 
-# FULL CREDIT TO JUANMA CORIA FOR THIS DIART IMPLEMENTATION WITH WHISPER (COLOR YOUR CAPTIONS ON MEDIUM)
+# All credit goes to Juanma Coria: https://betterprogramming.pub/color-your-captions-streamlining-live-transcriptions-with-diart-and-openais-whisper-6203350234ef
 
 
 def concat(chunks, collar=0.05):
@@ -37,8 +37,17 @@ def jsonify_transcription(transcription):
     """
     result = []
     for speaker, text in transcription:
-        if speaker == -1:
+        if speaker == -1:  # If no speaker detected in segment, we mark the speaker as unknown
             result.append({"speaker": "unknown", "text": text})
         else:
             result.append({"speaker": speaker, "text": text})
     return result
+
+
+def format_whisper_model_name(model_name):
+    """
+    Format the model size name (tiny, small, large-v1, etc) to match the enum members in WhisperModelSize
+
+    Replaces dashes with underscores and makes the string uppercase
+    """
+    return model_name.replace("-", "_").upper()

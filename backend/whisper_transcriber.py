@@ -5,10 +5,10 @@ import whisper_timestamped as whisper
 from pyannote.core import Segment
 from contextlib import contextmanager
 import logging
-from config import NON_SPECIFIC_MODELS
+from config import NON_ENGLISH_SPECIFIC_MODELS
 
 
-# FULL CREDIT TO JUANMA CORIA FOR THIS DIART IMPLEMENTATION WITH WHISPER (COLOR YOUR CAPTIONS ON MEDIUM)
+# All credit goes to Juanma Coria: https://betterprogramming.pub/color-your-captions-streamlining-live-transcriptions-with-diart-and-openais-whisper-6203350234ef
 
 
 @contextmanager
@@ -32,7 +32,7 @@ class WhisperTranscriber:
 
     @staticmethod
     def get_full_model_name(model_name, language_code):
-        if model_name not in NON_SPECIFIC_MODELS and language_code == "en":
+        if model_name not in NON_ENGLISH_SPECIFIC_MODELS and language_code == "en":
             model_name += ".en"
         return model_name
 
