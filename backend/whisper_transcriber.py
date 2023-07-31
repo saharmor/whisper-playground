@@ -22,9 +22,11 @@ def suppress_stdout():
 
 
 class WhisperTranscriber:
-    def __init__(self, language_code=None, model_name="large-v2", device="cuda", compute_type="int8_float16", beam_size=1):
+    def __init__(self, language_code=None, model_name="large-v2", device="cuda", compute_type="int8_float16",
+                 beam_size=1):
         self.language = language_code
-        self.model = WhisperModel(model_name, device=device, compute_type=compute_type)
+        self.model = WhisperModel(self.get_full_model_name(model_name, language_code), device=device,
+                                  compute_type=compute_type)
         self._buffer = ""
         self.current_transcription = None
         self.beam_size = beam_size
