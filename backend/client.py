@@ -20,6 +20,7 @@ class Client:
         self.diarization_pipeline = OnlineSpeakerDiarization(DIARIZATION_PIPELINE_CONFIG)
         self.pipeline_config = DIARIZATION_PIPELINE_CONFIG
         self.transcriber = None
+        self.transcription_timeout = None
         self.config = config
         self.source = StreamingSocketAudioSource(sid)
         self.socket = socket
@@ -29,9 +30,9 @@ class Client:
         self.disconnected = False
         self.ending_stream = False
 
-        self.initialize_transcriber()
+        self.initialize_with_config()
 
-    def initialize_transcriber(self):
+    def initialize_with_config(self):
         # Format the name received from the client to match the enum members
         whisper_model_name = format_whisper_model_name(self.config.get("model", "small"))
         try:
@@ -46,7 +47,12 @@ class Client:
         except KeyError:
             logging.warning(f"Language {language} not supported, defaulting to English")
             language_code = "en"
-        self.transcriber = WhisperTranscriber(model_name=whisper_model.value, language_code=language_code)
+        beam_size = int(self.config.get("beamSize", 1))
+
+        self.transcriber = WhisperTranscriber(model_name=whisper_model.value, language_code=language_code,
+                                              beam_size=beam_size)
+
+        self.transcription_timeout = int(self.config.get("transcribeTimeout", 5))
 
     async def start_transcribing(self):
         self.transcription_thread = threading.Thread(target=self.stream_transcription)
@@ -82,6 +88,7 @@ class Client:
 
     def receive_chunk(self, chunk):
         self.source.receive_chunk(chunk)
+
     def complete_stream(self):
         self.source.stream.on_completed()
         logging.info("Stream source signaled completion")
@@ -104,10 +111,8 @@ class Client:
     def stream_transcription(self):
         logging.info("Transcription thread started")
 
-        # Split the stream into 2s chunks for transcription
-        transcription_duration = 2
         # Apply models in batches for better efficiency
-        batch_size = int(transcription_duration // self.pipeline_config.step)
+        batch_size = int(self.transcription_timeout // self.pipeline_config.step)
 
         stream_finished_event = threading.Event()
 

@@ -1,3 +1,4 @@
 diart
 python-socketio
-git+https://github.com/linto-ai/whisper-timestamped
+faster-whisper
+stable-ts

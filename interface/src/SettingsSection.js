@@ -9,18 +9,25 @@ const SettingsSections = ({
   disabled,
   possibleLanguages,
   selectedLanguage,
+  transcribeTimeout,
+  beamSize,
   onLanguageChange,
   modelOptions,
   selectedModel,
   onModelChange,
-  onTranscribeTiemoutChanged,
+  onTranscribeTimeoutChanged,
+  onBeamSizeChanged,
 }) => {
   function onModelChangeLocal(event) {
     onModelChange(event.target.value);
   }
 
-  function onTranscribeTiemoutChangedLocal(event) {
-    onTranscribeTiemoutChanged(event.target.value);
+  function onTranscribeTimeoutChangedLocal(event) {
+    onTranscribeTimeoutChanged(event.target.value);
+  }
+
+  function onBeamSizeChangedLocal(event) {
+    onBeamSizeChanged(event.target.value);
   }
 
   return (
@@ -65,6 +72,24 @@ const SettingsSections = ({
             renderInput={(params) => <TextField {...params} label="Language" />}
           />
         </FormControl>
+      </Grid>
+      <Grid item>
+        <TextField
+          label="Transcription Timeout"
+          type="number"
+          value={transcribeTimeout}
+          onChange={(event) => onTranscribeTimeoutChangedLocal(event)}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item>
+        <TextField
+          label="Beam Size"
+          type="number"
+          value={beamSize}
+          onChange={(event) => onBeamSizeChangedLocal(event)}
+          disabled={disabled}
+        />
       </Grid>
     </Grid>
   );

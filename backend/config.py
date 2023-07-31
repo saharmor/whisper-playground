@@ -14,8 +14,13 @@ DIARIZATION_PIPELINE_CONFIG = PipelineConfig(
     rho_update=MINIMUM_SPEECH_IMPROVEMENT_LENGTH,
     delta_new=NEW_SPEAKER_THRESHOLD
 )
+
+SPEAKER_MAPPING = {
+    -1: "unknown"
+}
+
 SAMPLE_RATE = 16000
-NON_ENGLISH_SPECIFIC_MODELS = ["large", "large-v1", "large-v2"] # Models that don't have an English-only version
+NON_ENGLISH_SPECIFIC_MODELS = ["large", "large-v1", "large-v2"]  # Models that don't have an English-only version
 
 
 class WhisperModelSize(Enum):
@@ -128,4 +133,3 @@ LANGUAGE_MAPPING = {
     "javanese": "jv",
     "sundanese": "su",
 }
-

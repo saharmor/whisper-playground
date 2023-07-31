@@ -2,6 +2,7 @@ from client import Client
 import logging
 import asyncio
 import threading
+from utils import create_temp_folder
 
 
 class ClientManager:
@@ -42,7 +43,8 @@ class ClientManager:
             client = self.clients[sid]
             if client != "initializing":
                 client.handle_disconnection()
-            if not client.is_ending_stream():
+            # No error if client is still not an object, it won't get to that point
+            if client == "initializing" or not client.is_ending_stream():
                 try:
                     self.clients.pop(sid)
                 except KeyError:

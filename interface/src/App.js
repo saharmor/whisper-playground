@@ -55,6 +55,8 @@ const App = ({ classes }) => {
   const [isStreamPending, setIsStreamPending] = useState(false);
   const [selectedLanguage, setSelectedLanguage] = useState("english");
   const [selectedModel, setSelectedModel] = useState("small");
+  const [transcribeTimeout, setTranscribeTimeout] = useState(5);
+  const [beamSize, setBeamSize] = useState(1);
   const [errorMessage, setErrorMessage] = useState(null);
 
   const socketRef = useRef(null);
@@ -85,13 +87,20 @@ const App = ({ classes }) => {
       .then(function (s) {
         streamRef.current = s;
 
+        setIsRecording(true);
+
         // Create a new WebSocket connection.
-        socketRef.current = new io.connect("http://0.0.0.0:8000", {
-          transports: ["websocket"],
-        });
+        socketRef.current = new io.connect(
+          "https://007a-34-143-216-89.ngrok-free.app/",
+          {
+            transports: ["websocket"],
+          }
+        );
         const config = {
           language: selectedLanguage,
           model: selectedModel,
+          transcribeTimeout: transcribeTimeout,
+          beamSize: beamSize,
         };
         socketRef.current.emit("startWhispering", config);
 
@@ -159,7 +168,6 @@ const App = ({ classes }) => {
     setAudioData([]);
     socketRef.current.on("whisperingStopped", function () {
       setIsStreamPending(false);
-      console.log("disconnected");
       setIsRecording(false);
       socketRef.current.disconnect();
     });
@@ -180,10 +188,14 @@ const App = ({ classes }) => {
           disabled={isRecording}
           possibleLanguages={SUPPORTED_LANGUAGES}
           selectedLanguage={selectedLanguage}
+          transcribeTimeout={transcribeTimeout}
+          beamSize={beamSize}
           onLanguageChange={setSelectedLanguage}
           modelOptions={WHISPER_MODEL_OPTIONS}
           selectedModel={selectedModel}
           onModelChange={setSelectedModel}
+          onTranscribeTimeoutChanged={setTranscribeTimeout}
+          onBeamSizeChanged={setBeamSize}
         />
       </div>
       {errorMessage && (

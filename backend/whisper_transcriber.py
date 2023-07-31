@@ -1,20 +1,17 @@
 import os
 import sys
 import numpy as np
-import whisper_timestamped as whisper
 from pyannote.core import Segment
 from contextlib import contextmanager
 import logging
 from config import NON_ENGLISH_SPECIFIC_MODELS
-
-
-# All credit goes to Juanma Coria: https://betterprogramming.pub/color-your-captions-streamlining-live-transcriptions-with-diart-and-openais-whisper-6203350234ef
+from utils import format_transcription
+from faster_whisper import WhisperModel
+import stable_whisper
 
 
 @contextmanager
 def suppress_stdout():
-    # Auxiliary function to suppress Whisper logs (it is quite verbose)
-    # All credit goes to: https://thesmithfam.org/blog/2012/10/25/temporarily-suppress-console-output-in-python/
     with open(os.devnull, "w") as devnull:
         old_stdout = sys.stdout
         sys.stdout = devnull
@@ -25,10 +22,13 @@ def suppress_stdout():
 
 
 class WhisperTranscriber:
-    def __init__(self, language_code=None, model_name="small", device=None):
+    def __init__(self, language_code=None, model_name="large-v2", device="cuda", compute_type="int8_float16", beam_size=1):
         self.language = language_code
-        self.model = whisper.load_model(self.get_full_model_name(model_name, language_code), device=device)
+        self.model = WhisperModel(model_name, device=device, compute_type=compute_type)
         self._buffer = ""
+        self.current_transcription = None
+        self.beam_size = beam_size
+        self.counter = 1
 
     @staticmethod
     def get_full_model_name(model_name, language_code):
@@ -36,54 +36,85 @@ class WhisperTranscriber:
             model_name += ".en"
         return model_name
 
-    def transcribe(self, waveform):
-        logging.info("Transcription started")
+    def inference(self, audio, **kwargs):
+        self.current_transcription = self.get_transcription(audio)
+        return self.current_transcription
+
+    def get_transcription(self, audio):
         """Transcribe audio using Whisper"""
         # Pad/trim audio to fit 30 seconds as required by Whisper
-        audio = waveform.data.astype("float32").reshape(-1)
-        audio = whisper.pad_or_trim(audio)
-
         # Transcribe the given audio while suppressing logs
         with suppress_stdout():
-            transcription = whisper.transcribe(
-                self.model,
+            segments, info = self.model.transcribe(
                 audio,
                 # We use past transcriptions to condition the model
                 initial_prompt=self._buffer,
-                # If model is English-specific, prevent language detection (causes KeyError in whisper-timestamped)
+                # If model is English-specific, prevent language detection
                 **({"language": self.language} if self.language is not None else {}),
-                verbose=True  # Disable progress bar
+                word_timestamps=True,
+                beam_size=self.beam_size
             )
-
+            segments = list(segments)
+            transcription = format_transcription(segments, info)
+            self.counter += 1
         return transcription
+
+    def transcribe(self, waveform):
+        logging.info(f"Transcription number {self.counter} started")
+        audio = waveform.data.astype("float32").reshape(-1)
+
+        # The inferenced transcription can fail when suppressing silent parts, defaulting to the original transcription
+        try:
+            aligned_transcription = stable_whisper.transcribe_any(self.inference, audio, input_sr=16000).to_dict()
+            if aligned_transcription['text'] == "":
+                logging.info("Empty aligned transcription, defaulting to original")
+                return self.current_transcription
+        except ValueError:
+            return self.current_transcription
+
+        return aligned_transcription
 
     @staticmethod
     def identify_speakers(transcription, diarization, time_shift):
-        """Iterate over transcription segments to assign speakers"""
+        """
+        Iterate over transcription segments to assign speakers
+        All credit goes to Juanma Coria: https://betterprogramming.pub/color-your-captions-streamlining-live-transcriptions-with-diart-and-openais-whisper-6203350234ef
+        """
+        logging.info(f"\nDiarization: {diarization}")
         speaker_captions = []
-        for segment in transcription["segments"]:
-
+        for (index, segment) in enumerate(transcription["segments"]):
             # Crop diarization to the segment timestamps
-            start = time_shift + segment["words"][0]["start"]
-            end = time_shift + segment["words"][-1]["end"]
+            logging.info(
+                f"Segment {index + 1}: Actual start time: {segment['start']}, Actual end time: {segment['end']}, Time shift: {time_shift}")
+            start = time_shift + segment["start"]
+            end = time_shift + segment["end"]
+            if start == end:
+                end += 0.05  # Add 50ms to avoid false mis-identification of an unknown speaker
             dia = diarization.crop(Segment(start, end))
-
+            logging.info(f"Start/End times with time shift - Start: {start}, End: {end}")
             # Assign a speaker to the segment based on diarization
             speakers = dia.labels()
+            logging.info(f"Speaker labels: {speakers}")
             num_speakers = len(speakers)
+
             if num_speakers == 0:
                 # No speakers were detected
-                caption = (-1, segment["text"])
+                caption = (-1, segment["text"], start, end)
+                logging.info(f"Unknown speaker found.")
             elif num_speakers == 1:
                 # Only one speaker is active in this segment
                 spk_id = int(speakers[0].split("speaker")[1])
-                caption = (spk_id, segment["text"])
+                logging.info(f"No other speakers found. Selected speaker: speaker{spk_id}")
+                caption = (spk_id, segment["text"], start, end)
             else:
                 # Multiple speakers, select the one that speaks the most
-                max_speaker = int(np.argmax([
+                max_speaker_index = int(np.argmax([
                     dia.label_duration(spk) for spk in speakers
                 ]))
-                caption = (max_speaker, segment["text"])
+                spk_label = speakers[max_speaker_index]
+                spk_id = int(spk_label.split("speaker")[1])
+                logging.info(f"Multiple speakers found. Selected speaker: {spk_label}")
+                caption = (spk_id, segment["text"], start, end)
             speaker_captions.append(caption)
 
         return speaker_captions
