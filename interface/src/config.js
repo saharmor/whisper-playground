@@ -9,6 +9,10 @@ export const WHISPER_MODEL_OPTIONS = [
   "large-v1",
   "large-v2",
 ];
+export const TRANSCRIPTION_METHODS = [
+  "real",
+  "sequential",
+]
 export const SUPPORTED_LANGUAGES = [
   "english",
   "chinese",

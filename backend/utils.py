@@ -1,6 +1,22 @@
 import numpy as np
 from pyannote.core import Annotation, SlidingWindowFeature, SlidingWindow
+from scipy.io import wavfile
+import os
 from config import SPEAKER_MAPPING
+from diart.sources import AudioSource
+from config import SAMPLE_RATE
+from diart.utils import decode_audio
+import logging
+
+
+class StreamingSocketAudioSource(AudioSource):
+    def __init__(self, sid):
+        self.sample_rate = SAMPLE_RATE
+        super().__init__(uri=sid, sample_rate=self.sample_rate)
+
+    def receive_chunk(self, chunk):
+        self.stream.on_next(decode_audio(chunk))
+        logging.debug("Chunk received in stream")
 
 
 def concat(chunks, collar=0.05):
@@ -113,3 +129,22 @@ def format_transcription(segments, info):
         "text": text,
         "segments": segments
     }
+
+
+def extract_speaker_id(speaker_label):
+    try:
+        # Extract the speaker number (last two characters of the input string) and convert to int
+        speaker_number = int(speaker_label[-2:])
+        return speaker_number
+    except ValueError:
+        logging.warning(f"Couldn't extract speaker id from label {speaker_label}")
+        return None
+
+
+def save_batch_to_wav(batch, path, sample_rate=16000):
+    folder = os.path.dirname(path)
+    if folder and not os.path.exists(folder):
+        os.makedirs(folder)
+
+    wavfile.write(path, sample_rate, np.array(batch))
+    logging.info(f"Saved batch to current.wav")

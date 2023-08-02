@@ -1,8 +1,7 @@
-from client import Client
 import logging
 import asyncio
 import threading
-from utils import create_temp_folder
+from clients.utils import initialize_client
 
 
 class ClientManager:
@@ -12,7 +11,7 @@ class ClientManager:
 
     async def create_new_client(self, sid, sio, config):
         self.clients[sid] = "initializing"
-        new_client = Client(sid=sid, socket=sio, config=config)
+        new_client = initialize_client(sid, sio, config)
         if self.clients.get(sid):
             self.clients[sid] = new_client
             await new_client.start_transcribing()

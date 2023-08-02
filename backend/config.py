@@ -5,10 +5,11 @@ SLIDING_WINDOW_LENGTH = 5
 PROBABILITY_THRESHOLD = 0.5  # Diart will recognize a speaker if the probability of them speaking is higher than this
 MINIMUM_SPEECH_IMPROVEMENT_LENGTH = 0.1  # Diart will self-improve its speaker recognition for a speaker if the speaker speaks for longer than this
 NEW_SPEAKER_THRESHOLD = 0.57  # Threshold for new speaker detection, the lower, the more sensitive Diart is to speech differences and will be more likely to generate new speakers
+STEP = 0.5
 
 DIARIZATION_PIPELINE_CONFIG = PipelineConfig(
     duration=SLIDING_WINDOW_LENGTH,
-    step=0.5,
+    step=STEP,
     latency="min",
     tau_active=PROBABILITY_THRESHOLD,
     rho_update=MINIMUM_SPEECH_IMPROVEMENT_LENGTH,
@@ -21,6 +22,8 @@ SPEAKER_MAPPING = {
 
 SAMPLE_RATE = 16000
 NON_ENGLISH_SPECIFIC_MODELS = ["large", "large-v1", "large-v2"]  # Models that don't have an English-only version
+
+TEMP_FILE_PATH = "temp/batch.wav"  # Path to the temporary file used for batch transcription in SequentialClient
 
 
 class WhisperModelSize(Enum):

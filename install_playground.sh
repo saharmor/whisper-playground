@@ -36,10 +36,13 @@ conda create -n env python=3.8
 source ~/anaconda3/etc/profile.d/conda.sh # Fix to conda activate env not working
 conda activate env
 echo "Conda environment activated"
+conda install nomkl # to avoid issues with MKL when using faster-whisper
+echo "nomkl installed"
 
 # Install diart requirements
 conda install portaudio pysoundfile ffmpeg -c conda-forge
 echo "Diart requirements installed"
+
 
 # Install packages from 'requirements.txt'
 pip install -r requirements.txt

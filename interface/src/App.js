@@ -11,6 +11,7 @@ import {
   MIC_SAMPLE_RATE,
   BLOCK_SIZE,
   WHISPER_MODEL_OPTIONS,
+  TRANSCRIPTION_METHODS,
   SUPPORTED_LANGUAGES,
 } from "./config";
 import WaveformVisualizer from "./WaveformVisualizer";
@@ -58,6 +59,7 @@ const App = ({ classes }) => {
   const [transcribeTimeout, setTranscribeTimeout] = useState(5);
   const [beamSize, setBeamSize] = useState(1);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [transcriptionMethod, setTranscriptionMethod] = useState("real");
 
   const socketRef = useRef(null);
 
@@ -77,7 +79,11 @@ const App = ({ classes }) => {
   }
 
   function handleTranscribedData(data) {
-    setTranscribedData((prevData) => [...prevData, ...data]);
+    if (transcriptionMethod === "real") {
+      setTranscribedData((prevData) => [...prevData, ...data]);
+    } else if (transcriptionMethod === "sequential") {
+      setTranscribedData(data);
+    }
   }
 
   function startStream() {
@@ -91,7 +97,7 @@ const App = ({ classes }) => {
 
         // Create a new WebSocket connection.
         socketRef.current = new io.connect(
-          "https://007a-34-143-216-89.ngrok-free.app/",
+          "http://0.0.0.0:8000",
           {
             transports: ["websocket"],
           }
@@ -101,6 +107,7 @@ const App = ({ classes }) => {
           model: selectedModel,
           transcribeTimeout: transcribeTimeout,
           beamSize: beamSize,
+          transcriptionMethod: transcriptionMethod,
         };
         socketRef.current.emit("startWhispering", config);
 
@@ -192,10 +199,13 @@ const App = ({ classes }) => {
           beamSize={beamSize}
           onLanguageChange={setSelectedLanguage}
           modelOptions={WHISPER_MODEL_OPTIONS}
+          methodOptions={TRANSCRIPTION_METHODS}
           selectedModel={selectedModel}
+          selectedMethod={transcriptionMethod}
           onModelChange={setSelectedModel}
-          onTranscribeTimeoutChanged={setTranscribeTimeout}
-          onBeamSizeChanged={setBeamSize}
+          onTranscribeTimeoutChange={setTranscribeTimeout}
+          onBeamSizeChange={setBeamSize}
+          onMethodChange={setTranscriptionMethod}
         />
       </div>
       {errorMessage && (

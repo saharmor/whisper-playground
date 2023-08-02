@@ -13,21 +13,28 @@ const SettingsSections = ({
   beamSize,
   onLanguageChange,
   modelOptions,
+  methodOptions,
   selectedModel,
+  selectedMethod,
   onModelChange,
-  onTranscribeTimeoutChanged,
-  onBeamSizeChanged,
+  onTranscribeTimeoutChange,
+  onBeamSizeChange,
+  onMethodChange
 }) => {
   function onModelChangeLocal(event) {
     onModelChange(event.target.value);
   }
 
   function onTranscribeTimeoutChangedLocal(event) {
-    onTranscribeTimeoutChanged(event.target.value);
+    onTranscribeTimeoutChange(event.target.value);
   }
 
   function onBeamSizeChangedLocal(event) {
-    onBeamSizeChanged(event.target.value);
+    onBeamSizeChange(event.target.value);
+  }
+
+  function onMethodChangeLocal(event) {
+    onMethodChange(event.target.value);
   }
 
   return (
@@ -90,6 +97,25 @@ const SettingsSections = ({
           onChange={(event) => onBeamSizeChangedLocal(event)}
           disabled={disabled}
         />
+      </Grid>
+      <Grid item>
+        <FormControl variant="standard" sx={{ m: 2, minWidth: 220 }}>
+          <InputLabel id="model-select-label">Transcription Method</InputLabel>
+          <Select
+            labelId="model-select-label"
+            value={selectedMethod}
+            onChange={(event) => onMethodChangeLocal(event)}
+            disabled={disabled}
+          >
+            {Object.keys(methodOptions).map((model) => {
+              return (
+                <MenuItem key={model} value={methodOptions[model]}>
+                  {methodOptions[model]}
+                </MenuItem>
+              );
+            })}
+          </Select>
+        </FormControl>
       </Grid>
     </Grid>
   );
