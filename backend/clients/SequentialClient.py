@@ -40,7 +40,6 @@ class SequentialClient(Client):
         while True:
             if chunk_counter >= batch_size:
                 transcribe_buffer(buffer)
-                current_batch = []
             if not self.audio_chunks.empty():
                 current_chunk = self.audio_chunks.get()
                 if current_chunk is None:
