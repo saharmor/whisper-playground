@@ -16,6 +16,14 @@ DIARIZATION_PIPELINE_CONFIG = PipelineConfig(
     delta_new=NEW_SPEAKER_THRESHOLD
 )
 
+PARAMETERS = {
+    "language",
+    "model",
+    "transcribeTimeout",
+    "beamSize",
+    "transcriptionMethod"
+}
+
 SPEAKER_MAPPING = {
     -1: "unknown"
 }

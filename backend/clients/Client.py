@@ -20,7 +20,6 @@ class Client:
 
     async def stop_transcribing(self):
         self.ending_stream = True
-        self.audio_chunks.put(None)
         self.transcription_thread.join()
         logging.info("Transcription thread closed due to completion (stream ended)")
         await self.socket.emit("whisperingStopped")
@@ -30,7 +29,6 @@ class Client:
         logging.info("Starting disconnection process, no longer sending transcriptions to client")
         self.disconnected = True
         if not self.ending_stream:
-            self.audio_chunks.put(None)
             self.transcription_thread.join()
             logging.info("Transcription thread closed due to disconnection")
 

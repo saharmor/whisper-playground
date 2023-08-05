@@ -59,7 +59,7 @@ const App = ({ classes }) => {
   const [transcribeTimeout, setTranscribeTimeout] = useState(5);
   const [beamSize, setBeamSize] = useState(1);
   const [errorMessage, setErrorMessage] = useState(null);
-  const [transcriptionMethod, setTranscriptionMethod] = useState("real");
+  const [transcriptionMethod, setTranscriptionMethod] = useState("real-time");
 
   const socketRef = useRef(null);
 
@@ -79,7 +79,7 @@ const App = ({ classes }) => {
   }
 
   function handleTranscribedData(data) {
-    if (transcriptionMethod === "real") {
+    if (transcriptionMethod === "real-time") {
       setTranscribedData((prevData) => [...prevData, ...data]);
     } else if (transcriptionMethod === "sequential") {
       setTranscribedData(data);
@@ -95,13 +95,6 @@ const App = ({ classes }) => {
 
         setIsRecording(true);
 
-        // Create a new WebSocket connection.
-        socketRef.current = new io.connect(
-          "http://0.0.0.0:8000",
-          {
-            transports: ["websocket"],
-          }
-        );
         const config = {
           language: selectedLanguage,
           model: selectedModel,
@@ -109,7 +102,15 @@ const App = ({ classes }) => {
           beamSize: beamSize,
           transcriptionMethod: transcriptionMethod,
         };
-        socketRef.current.emit("startWhispering", config);
+
+        // Create a new WebSocket connection.
+        socketRef.current = new io.connect(
+          "http://0.0.0.0:8000",
+          {
+            transports: ["websocket"],
+            query: config,
+          }
+        );
 
         // When the WebSocket connection is open, start sending the audio data.
         socketRef.current.on("whisperingStarted", function () {

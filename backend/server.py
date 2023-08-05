@@ -4,10 +4,13 @@ from client_manager import ClientManager
 import logging
 import threading
 import asyncio
+from urllib.parse import parse_qs
+from config import PARAMETERS
 
 # Configure logging settings
 logging.basicConfig()
 logging.root.setLevel(logging.INFO)
+logging.getLogger("torch.distributed.nn.jit.instantiator").disabled = True
 
 sio = socketio.AsyncServer(cors_allowed_origins=[])
 app = web.Application()
@@ -17,20 +20,23 @@ client_manager = ClientManager()
 
 
 @sio.on("connect")
-def handle_connect(sid, environ):
-    logging.info("Client connected")
+async def handle_connect(sid, environ):
+    logging.info("Client connected, initializing stream...")
+    query_string = environ["QUERY_STRING"]
+    query_params = parse_qs(query_string)
+    config = {}
+    for parameter in PARAMETERS:
+        current_parameter = query_params.get(parameter)
+        if current_parameter:
+            config[parameter] = current_parameter[0]
+    logging.info(f"Stream configuration received: {config}")
+    await client_manager.start_stream(sid=sid, sio=sio, config=config)
 
 
 @sio.on("disconnect")
 def handle_disconnect(sid):
     logging.info("Disconnection detected")
     client_manager.disconnect_from_stream(sid)
-
-
-@sio.on("startWhispering")
-async def handle_stream_start(sid, config):
-    logging.info("Stream configuration received: %s", config)
-    await client_manager.start_stream(sid=sid, sio=sio, config=config)
 
 
 @sio.on("stopWhispering")

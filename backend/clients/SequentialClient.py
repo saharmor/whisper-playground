@@ -6,7 +6,7 @@ from backend.utils import save_batch_to_wav
 import numpy as np
 from backend.config import STEP, TEMP_FILE_PATH
 from pyannote.audio import Pipeline
-from Client import Client
+from clients.Client import Client
 
 
 class SequentialClient(Client):
@@ -27,25 +27,42 @@ class SequentialClient(Client):
         diarization = self.diarization_pipeline(TEMP_FILE_PATH)
         return diarization
 
-    def stream_sequential_transcription(self):
-        def transcribe_buffer(buffer):
-            diarization = self.get_diarization(buffer)
-            result = self.transcriber.sequential_transcription(buffer, diarization)
-            asyncio.run(self.send_transcription(result))
+    def transcribe_buffer(self, buffer):
+        diarization = self.get_diarization(buffer)
+        result = self.transcriber.sequential_transcription(buffer, diarization)
+        asyncio.run(self.send_transcription(result))
 
+    @staticmethod
+    def modify_buffer(chunk, buffer):
+        decoded_chunk = decode_audio(chunk)
+        buffer = decoded_chunk if buffer is None else np.concatenate([buffer, decoded_chunk], axis=1)
+        return buffer
+
+    def stream_sequential_transcription(self):
         logging.info("Sequential transcription thread started")
         buffer = None
         chunk_counter = 0
         batch_size = self.transcription_timeout // STEP
+        assert batch_size > 0, "batch size must be above 0"
+
         while True:
-            if chunk_counter >= batch_size:
-                transcribe_buffer(buffer)
-            if not self.audio_chunks.empty():
-                current_chunk = self.audio_chunks.get()
-                if current_chunk is None:
-                    if chunk_counter > 0:
-                        transcribe_buffer(buffer)
+            if self.disconnected:
+                logging.info("Client disconnected, ending transcription...")
+            if not self.ending_stream:
+                if chunk_counter >= batch_size:
+                    self.transcribe_buffer(buffer)
+                    chunk_counter = 0
+                if not self.audio_chunks.empty():
+                    current_chunk = self.audio_chunks.get()
+                    buffer = self.modify_buffer(current_chunk, buffer)
+                    chunk_counter += 1
+            else:
+                logging.info("Client is ending stream, preparing for a final transcription...")
+                chunk_counter = 0
+                while not self.audio_chunks.empty():
+                    current_chunk = self.audio_chunks.get()
+                    buffer = self.modify_buffer(current_chunk, buffer)
+                    chunk_counter += 1
+                if chunk_counter > 0:
+                    self.transcribe_buffer(buffer)
                     break
-                decoded_chunk = decode_audio(current_chunk)
-                buffer = decoded_chunk if buffer is None else np.concatenate([buffer, decoded_chunk], axis=1)
-                chunk_counter += 1

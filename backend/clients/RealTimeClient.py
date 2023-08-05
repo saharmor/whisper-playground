@@ -8,7 +8,7 @@ import rx.operators as ops
 from backend.utils import concat, jsonify_transcription, StreamingSocketAudioSource
 import traceback
 import threading
-from Client import Client
+from clients.Client import Client
 
 
 class RealTimeClient(Client):
@@ -38,19 +38,26 @@ class RealTimeClient(Client):
     def receive_chunks(self):
         logging.info("New chunks handler started")
         while True:
+            if self.disconnected:
+                logging.info("Client disconnected, ending transcription...")
+                self.complete_stream()
+                return
             if not self.audio_chunks.empty():
                 current_chunk = self.audio_chunks.get()
-                if current_chunk is None:
-                    self.complete_stream()
-                    return
                 # not a heavy operation but a blocking one during pipeline execution, shouldn't block the main thread thanks to threading
                 self.source.receive_chunk(current_chunk)
+            else:
+                if self.ending_stream:
+                    logging.info("No more chunks, preparing for a final transcription...")
+                    self.complete_stream()
+                    return
 
     def stream_real_transcription(self):
         logging.info("Real-time transcription thread started")
 
         # Apply models in batches for better efficiency
         batch_size = int(self.transcription_timeout // self.pipeline_config.step)
+        assert batch_size > 0, "batch size must be above 0"
 
         stream_finished_event = threading.Event()
 

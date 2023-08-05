@@ -1,6 +1,6 @@
 import logging
-from RealTimeClient import RealTimeClient
-from SequentialClient import SequentialClient
+from clients.RealTimeClient import RealTimeClient
+from clients.SequentialClient import SequentialClient
 from enum import Enum
 
 from backend.transcription.whisper_transcriber import WhisperTranscriber
@@ -9,12 +9,16 @@ from backend.config import WhisperModelSize, LANGUAGE_MAPPING
 
 
 class TranscriptionMethod(Enum):
-    REAL = RealTimeClient
+    REAL_TIME = RealTimeClient
     SEQUENTIAL = SequentialClient
 
 
+def format_transcription_method_name(transcription_method):
+    return transcription_method.upper().replace("-", "_")
+
+
 def get_client_class(config):
-    transcription_method_name = config.get("transcriptionMethod", "sequential").upper()
+    transcription_method_name = format_transcription_method_name(config.get("transcriptionMethod"))
     try:
         client_class = getattr(TranscriptionMethod, transcription_method_name).value
     except AttributeError:

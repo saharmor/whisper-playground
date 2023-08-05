@@ -6,8 +6,8 @@ from backend.config import NON_ENGLISH_SPECIFIC_MODELS
 from backend.utils import format_transcription, extract_speaker_id
 from faster_whisper import WhisperModel
 import stable_whisper
-from pyannote_utils import assign_speakers
-from diart_utils import identify_speakers
+from transcription.pyannote_utils import assign_speakers
+from transcription.diart_utils import identify_speakers
 
 
 @contextmanager
@@ -87,8 +87,9 @@ class WhisperTranscriber:
         speaker_transcriptions = identify_speakers(transcription, diarization, time_shift)
         return speaker_transcriptions
 
-    def sequential_transcription(self, audio, diarization):
+    def sequential_transcription(self, buffer, diarization):
         # Step 1: Transcribe
+        audio = buffer.astype("float32").reshape(-1)
         transcription = self.transcribe(audio)
         # Step 2: Assign speakers
         diarizated_transcription = assign_speakers(transcription, diarization)
