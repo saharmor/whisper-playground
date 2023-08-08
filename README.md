@@ -8,17 +8,9 @@
 
 ![visitors](https://visitor-badge.glitch.me/badge?page_id=saharmor.whisper-playground&left_color=green&right_color=red)
 
-Sequential Demo:
-
-https://github.com/ethanzrd/whisper-playground/assets/79014814/34c791f3-a10f-42e5-814f-8dba5f0e0cff
-
-Real-Time Demo:
 
 
-
-https://github.com/ethanzrd/whisper-playground/assets/79014814/0389ad47-ec62-4d6a-a6ff-aa23a8d3251f
-
-
+https://github.com/ethanzrd/whisper-playground/assets/79014814/44a9bcf0-e374-4c71-8189-1d99824fbdc5
 
 
 
@@ -43,7 +35,7 @@ choco install ffmpeg
 # on Windows using Scoop (https://scoop.sh/)
 scoop install ffmpeg
 ```
-
+2. Diart requires some packages to be installed via [`Conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
 2. Clone or fork this repository
 3. Install the backend and frontend environment `sh install_playground.sh`
 4. Run the backend `cd backend && source venv/bin/activate && flask run --port 8000`
@@ -51,25 +43,20 @@ scoop install ffmpeg
 
 # Parameters
 
-- Model Size: This includes the models provided by OpenAI, going from the tiny model to the large-v2 model.
+- Model Size: Choose the model size, from tiny to large-v2.
+- Language: Select the language you will be speaking in.
+- Transcription Timeout: Set the number of seconds the application will wait before transcribing the current audio data.
+- Beam Size: Adjust the amount of transcriptions generated and considered, which affects accuracy and transcription generation time.
+- Transcription Method: Choose "real-time" for real-time diarization and transcriptions, or "sequential" for periodic transcriptions with more context.
 
-- Language: The language you will be speaking in.
+## Known Bugs
 
-- Transcription Timeout: The number of seconds the application will wait before transcribing the current audio data.
+1. On MacOS, there's a clash between av files preventing transcription (works well on Google Colab with Python 3.8).
+2. In the sequential mode, there may be uncontrolled speaker swapping, which can be fixed by using pyannote's building blocks and handling speakers manually.
+3. In real-time mode, audio data not meeting the transcription timeout won't be transcribed.
 
-- Beam Size: The amount of transcriptions that will be generated and considered, improves accuracy, and increases transcription generation time.
+This repository hasn't been tested for all languages; please create an issue if you encounter any problems.
 
-- Transcription Method: For this, you may choose either "real" or "sequential". "real" stands for real-time, which means the diarization and transcriptions will be done in real-time. If your transcription timeout is 2, it will only transcribe those last 2 seconds every 2 seconds. The diarization will improve for a specific speaker the more they speak, but there's no duplicate detection in place and no way to go back and refine the transcription for now. "sequential" means that every 2 seconds, all of the audio data up to that point, will be transcribed. For example, if you've been streaming for 2 minutes, the entire 2 minutes will be transcribed, rather than the last two seconds. This allows for more refinement and accuracy, as completely new transcriptions are generated with more context each time. "sequential" drastically increases the time it takes to generate a transcription.
+## License
 
-# Known Bugs
-
-1. On MacOS (hasn't been tested on Windows), there's a clash between av files which prevents the transcription from running, leading to a crash. This works well in a Google Colab environment set up with Python 3.8
-
-2. In the "sequential" mode, there will be uncontrolled speaker swapping. Speaker 1 may suddenly become Speaker 2, and Speaker 2 will become Speaker 1. This happens we're currently using a basic implementation of pyannote's diarization pipeline, this can be fixed by using pyannote's building blocks instead and handling speakers manually.
-
-3. In the "real" mode, when you hit the "Stop" button and the remaining transcriptions are processed in the server, if there's audio data that doesn't meet the transcription timeout time (meaning it must be shorter in duration than the specified timeout time), it won't be transcribed. For example, if your transcription timeout is 2 and there's a second of untranscribed audio data left, it won't be transcribed.
-
-This repository hasn't been tested for all languages, if you encounter any problems, feel free to create an issue.
-
-# License
 This repository and the code and model weights of Whisper are released under the MIT License.
