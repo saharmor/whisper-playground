@@ -2,9 +2,9 @@ import numpy as np
 from pyannote.core import Annotation, SlidingWindowFeature, SlidingWindow
 from scipy.io import wavfile
 import os
-from config import SPEAKER_MAPPING
+import shutil
+from config import SPEAKER_MAPPING, SAMPLE_RATE, TEMP_FILE_PATH
 from diart.sources import AudioSource
-from config import SAMPLE_RATE
 from diart.utils import decode_audio
 import logging
 
@@ -149,3 +149,19 @@ def save_batch_to_wav(batch, path, sample_rate=16000):
 
     wavfile.write(path, sample_rate, np.array(batch))
     logging.info(f"Saved batch to {path}")
+
+
+def delete_temp_folder(temp_folder_path):
+    folder_name = os.path.dirname(temp_folder_path)
+    if folder_name and os.path.exists(folder_name):
+        try:
+            shutil.rmtree(folder_name)
+            logging.info(f"Temporary folder '{folder_name}' deleted successfully.")
+        except Exception as e:
+            logging.warning(f"Error deleting temporary folder '{folder_name}': {e}")
+    else:
+        logging.info(f"Temporary folder '{folder_name}' does not exist.")
+
+
+def cleanup(temp_path=TEMP_FILE_PATH):
+    delete_temp_folder(temp_path)

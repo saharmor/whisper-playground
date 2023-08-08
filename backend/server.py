@@ -1,6 +1,8 @@
+from faster_whisper import WhisperModel
+from diart import OnlineSpeakerDiarization
 from aiohttp import web
 import socketio
-from client_manager import ClientManager
+from backend.client_manager import ClientManager
 import logging
 import threading
 import asyncio
@@ -10,7 +12,10 @@ from config import PARAMETERS
 # Configure logging settings
 logging.basicConfig()
 logging.root.setLevel(logging.INFO)
-logging.getLogger("torch.distributed.nn.jit.instantiator").disabled = True
+logging.getLogger("torch.distributed.nn.jit.instantiator").setLevel(logging.WARNING)
+logging.getLogger("speechbrain.pretrained.fetching").setLevel(logging.WARNING)
+logging.getLogger("speechbrain.utils.parameter_transfer").setLevel(logging.WARNING)
+
 
 sio = socketio.AsyncServer(cors_allowed_origins=[])
 app = web.Application()
@@ -36,7 +41,7 @@ async def handle_connect(sid, environ):
 @sio.on("disconnect")
 def handle_disconnect(sid):
     logging.info("Disconnection detected")
-    client_manager.disconnect_from_stream(sid)
+    threading.Thread(target=client_manager.disconnect_from_stream, args=(sid,)).start()
 
 
 @sio.on("stopWhispering")

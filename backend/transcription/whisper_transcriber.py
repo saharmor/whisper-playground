@@ -9,7 +9,6 @@ import stable_whisper
 from transcription.pyannote_utils import assign_speakers
 from transcription.diart_utils import identify_speakers
 
-
 @contextmanager
 def suppress_stdout():
     with open(os.devnull, "w") as devnull:
@@ -71,6 +70,7 @@ class WhisperTranscriber:
                 logging.info("Empty aligned transcription, defaulting to original")
                 return self.current_transcription
         except ValueError:
+            logging.info("Transcription alignment failed, defaulting to original")
             return self.current_transcription
 
         return aligned_transcription

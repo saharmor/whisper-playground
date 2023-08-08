@@ -14,6 +14,7 @@ class SequentialClient(Client):
     def __init__(self, sid, socket, transcriber, transcription_timeout):
         super().__init__(sid, socket, transcriber, transcription_timeout)
         self.diarization_pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization")
+        self.cleanup_needed = True
 
     async def start_transcribing(self):
         self.transcription_thread = threading.Thread(target=self.stream_sequential_transcription)
@@ -48,6 +49,7 @@ class SequentialClient(Client):
         while True:
             if self.disconnected:
                 logging.info("Client disconnected, ending transcription...")
+                break
             if not self.ending_stream:
                 if chunk_counter >= batch_size:
                     self.transcribe_buffer(buffer)

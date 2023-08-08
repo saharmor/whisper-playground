@@ -78,6 +78,16 @@ const App = ({ classes }) => {
     return decodeURIComponent(encoded);
   }
 
+  const stopOnError = (errorMessage) => {
+    setErrorMessage(errorMessage);
+    stopRecording();
+    setIsRecording(false);
+    setIsStreamPending(false);
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+  };
+
   function handleTranscribedData(data) {
     if (transcriptionMethod === "real-time") {
       setTranscribedData((prevData) => [...prevData, ...data]);
@@ -104,13 +114,10 @@ const App = ({ classes }) => {
         };
 
         // Create a new WebSocket connection.
-        socketRef.current = new io.connect(
-          "http://0.0.0.0:8000",
-          {
-            transports: ["websocket"],
-            query: config,
-          }
-        );
+        socketRef.current = new io.connect("http://0.0.0.0:8000", {
+          transports: ["websocket"],
+          query: config,
+        });
 
         // When the WebSocket connection is open, start sending the audio data.
         socketRef.current.on("whisperingStarted", function () {
@@ -140,12 +147,13 @@ const App = ({ classes }) => {
         });
 
         socketRef.current.on("clientAlreadyStreaming", () => {
-          setErrorMessage(
+          stopOnError(
             "You are already streaming, wait for the current stream to end"
           );
-          stopRecording();
-          setIsRecording(false);
-          setIsStreamPending(false);
+        });
+
+        socketRef.current.on("noMoreClientsAllowed", () => {
+          stopOnError("No more clients allowed, try again later");
         });
 
         socketRef.current.on(

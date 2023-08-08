@@ -3,7 +3,7 @@ cd interface
 yarn install
 
 # install and run backend
-cd ../backend
+cd ..
 conda --version
 # Create a conda environment (to install Diart requirements) with Python 3.8 and activate it
 echo "Current shell: $SHELL"
@@ -32,16 +32,18 @@ esac
 # Now, your shell should be properly configured to use 'conda activate'
 echo "Your shell has been configured to use 'conda activate'."
 conda create -n env python=3.8
-# Activate the environment
-source ~/anaconda3/etc/profile.d/conda.sh # Fix to conda activate env not working
+# Fix for conda activate not working
+if [ -f ~/miniconda3/etc/profile.d/conda.sh ]; then
+    source ~/miniconda3/etc/profile.d/conda.sh
+elif [ -f ~/anaconda3/etc/profile.d/conda.sh ]; then
+    source ~/anaconda3/etc/profile.d/conda.sh
+fi
 conda activate env
 echo "Conda environment activated"
-conda install nomkl # to avoid issues with MKL when using faster-whisper
-echo "nomkl installed"
 
-# Install diart requirements
-conda install portaudio pysoundfile ffmpeg -c conda-forge
-echo "Diart requirements installed"
+# Install ffmpeg
+conda install ffmpeg -c conda-forge
+echo "Installed ffmpeg"
 
 
 # Install packages from 'requirements.txt'

@@ -14,6 +14,7 @@ class Client:
         self.transcription_thread = None
         self.disconnected = False
         self.ending_stream = False
+        self.cleanup_needed = False
 
     async def start_transcribing(self):
         pass
