@@ -35,10 +35,10 @@ choco install ffmpeg
 # on Windows using Scoop (https://scoop.sh/)
 scoop install ffmpeg
 ```
-2. Diart requires some packages to be installed via [`Conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html)
+2. Diart requires some packages to be installed via [`Conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) (Miniconda works as well)
 2. Clone or fork this repository
 3. Install the backend and frontend environment `sh install_playground.sh`
-4. Run the backend `cd backend && source venv/bin/activate && flask run --port 8000`
+4. Run the backend `cd backend && python server.py`
 5. In a different terminal, run the React frontend `cd interface && yarn start`
 
 # Parameters
@@ -49,11 +49,16 @@ scoop install ffmpeg
 - Beam Size: Adjust the amount of transcriptions generated and considered, which affects accuracy and transcription generation time.
 - Transcription Method: Choose "real-time" for real-time diarization and transcriptions, or "sequential" for periodic transcriptions with more context.
 
+## Latency
+If you want minimal latency, use the real-time mode. If you don't mind growing latency and prioritize accuracy, use the sequential mode.
+
 ## Known Bugs
 
-1. On MacOS, there's a clash between av files preventing transcription (works well on Google Colab with Python 3.8).
-2. In the sequential mode, there may be uncontrolled speaker swapping, which can be fixed by using pyannote's building blocks and handling speakers manually.
-3. In real-time mode, audio data not meeting the transcription timeout won't be transcribed.
+1. You may have ffmpeg errors when locally running the application. Create an issue including your operating system and the steps to reproduce.
+2. You may encounter problems when building the wheel for "safetensors". On MacOS, run `brew install rust` to fix it.
+3. In the sequential mode, the application may crash if the first transcription batch contains no speech.
+4. In the sequential mode, there may be uncontrolled speaker swapping, which can be fixed by using pyannote's building blocks and handling speakers manually.
+5. In real-time mode, audio data not meeting the transcription timeout won't be transcribed.
 
 This repository hasn't been tested for all languages; please create an issue if you encounter any problems.
 
