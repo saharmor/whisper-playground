@@ -8,7 +8,6 @@
     "@testing-library/jest-dom": "^4.2.4",
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
-    "axios": "^0.21.1",
     "bootstrap": "^5.2.1",
     "lodash": "^4.17.19",
     "react": "^18.2.0",
@@ -16,7 +15,8 @@
     "react-dom": "^18.2.0",
     "react-mic": "^12.4.6",
     "react-scripts": "^3.4.1",
-    "react-spinners": "^0.10.6"
+    "react-spinners": "^0.10.6",
+    "socket.io-client": "^4.7.1"
   },
   "scripts": {
     "start": "react-scripts --openssl-legacy-provider start",

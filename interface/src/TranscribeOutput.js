@@ -2,29 +2,66 @@ import React from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
 import Typography from "@material-ui/core/Typography";
 
-
 const useStyles = () => ({
   root: {
-    maxWidth: '800px',
-    display: 'flex'
+    maxWidth: "800px",
+    display: "flex",
   },
   outputText: {
-    marginLeft: '8px',
-    color: '#ef395a',
-  }
+    marginLeft: "8px",
+    color: "#ef395a",
+  },
 });
 
-const TranscribeOutput = ({classes, transcribedText, interimTranscribedText}) => {
-  if (transcribedText.length === 0 && interimTranscribedText.length === 0) {
-    return <Typography variant="body1">...</Typography>;
+const TranscribeOutput = ({ data, classes }) => {
+  function formatData(data) {
+    let formattedText = "";
+    let currentSpeaker = null;
+
+    data.forEach((item) => {
+      const speaker = item.speaker;
+      const text = item.text;
+      let speakerName = "";
+
+      if (speaker === -1) {
+        speakerName = "Unknown Speaker";
+      } else {
+        speakerName = `Speaker ${speaker + 1}`;
+      }
+
+      if (speaker !== currentSpeaker) {
+        if (formattedText.length > 0) {
+          formattedText += "\n\n";
+        }
+        formattedText += `${speakerName}: ${text}`;
+        currentSpeaker = speaker;
+      } else {
+        formattedText += ` ${text}`;
+      }
+    });
+
+    return formattedText;
   }
 
+  // Format the transcription data
+  const formattedTranscription = formatData(data);
+
+  // Split the paragraphs by the new line character '\n'
+  const paragraphs = formattedTranscription.split("\n");
+
   return (
-    <div className={classes.root}>
-      <Typography variant="body1">{transcribedText}</Typography>
-      <Typography className={classes.outputText} variant="body1">{interimTranscribedText}</Typography>
+    <div>
+      {paragraphs.map((paragraph, index) => (
+        <div key={index}>
+          {index !== 0 && <br />}{" "}
+          {/* Add two line breaks after the first paragraph */}
+          <Typography variant="body1" component="p">
+            {paragraph}
+          </Typography>
+        </div>
+      ))}
     </div>
-  )
-}
+  );
+};
 
 export default withStyles(useStyles)(TranscribeOutput);
