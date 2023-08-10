@@ -2,12 +2,13 @@ import os
 import sys
 from contextlib import contextmanager
 import logging
-from backend.config import NON_ENGLISH_SPECIFIC_MODELS
+from backend.config import NON_ENGLISH_SPECIFIC_MODELS, TRANSCRIPTION_DEVICE, COMPUTE_TYPE
 from backend.utils import format_transcription, extract_speaker_id
 from faster_whisper import WhisperModel
 import stable_whisper
 from transcription.pyannote_utils import assign_speakers
 from transcription.diart_utils import identify_speakers
+
 
 @contextmanager
 def suppress_stdout():
@@ -21,7 +22,8 @@ def suppress_stdout():
 
 
 class WhisperTranscriber:
-    def __init__(self, language_code=None, model_name="large-v2", device="cuda", compute_type="int8_float16",
+    def __init__(self, language_code=None, model_name="large-v2", device=TRANSCRIPTION_DEVICE,
+                 compute_type=COMPUTE_TYPE,
                  beam_size=1):
         self.language = language_code
         self.model = WhisperModel(self.get_full_model_name(model_name, language_code), device=device,
