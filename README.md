@@ -37,10 +37,9 @@ https://github.com/ethanzrd/whisper-playground/assets/79014814/44a9bcf0-e374-4c7
 
 ## Known Bugs
 
-1. On MacOS, there's a clash between av files preventing transcription (works well on Google Colab with Python 3.8).
-2. In the sequential mode, there may be uncontrolled speaker swapping, which can be fixed by using pyannote's building blocks and handling speakers manually.
-3. In real-time mode, audio data not meeting the transcription timeout won't be transcribed.
-4. Speechless batches will cause errors.
+1. [In the sequential mode, there may be uncontrolled speaker swapping.](https://github.com/saharmor/whisper-playground/issues/27)
+2. [In real-time mode, audio data not meeting the transcription timeout won't be transcribed.](https://github.com/saharmor/whisper-playground/issues/28)
+3. [Speechless batches will cause errors.](https://github.com/saharmor/whisper-playground/issues/25)
 
 This repository hasn't been tested for all languages; please create an issue if you encounter any problems.
 
