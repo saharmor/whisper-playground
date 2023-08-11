@@ -32,7 +32,6 @@ https://github.com/ethanzrd/whisper-playground/assets/79014814/44a9bcf0-e374-4c7
 
 ## Troubleshooting
 
-- If you're unable to connect from the client to the server, use an ngrok tunnel to expose port 8000.
 - On MacOS, if building the wheel for safetensors fails, install Rust `brew install rust` and try again.
 
 ## Known Bugs
