@@ -2,8 +2,8 @@ import os
 import sys
 from contextlib import contextmanager
 import logging
-from backend.config import NON_ENGLISH_SPECIFIC_MODELS, TRANSCRIPTION_DEVICE, COMPUTE_TYPE
-from backend.utils import format_transcription, extract_speaker_id
+from config import NON_ENGLISH_SPECIFIC_MODELS, TRANSCRIPTION_DEVICE, COMPUTE_TYPE
+from utils import format_transcription, extract_speaker_id
 from faster_whisper import WhisperModel
 import stable_whisper
 from transcription.pyannote_utils import assign_speakers

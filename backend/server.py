@@ -2,7 +2,7 @@ from faster_whisper import WhisperModel
 from diart import OnlineSpeakerDiarization
 from aiohttp import web
 import socketio
-from backend.client_manager import ClientManager
+from client_manager import ClientManager
 import logging
 import threading
 import asyncio
