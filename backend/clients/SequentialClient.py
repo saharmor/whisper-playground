@@ -2,9 +2,9 @@ import logging
 import asyncio
 import threading
 from diart.utils import decode_audio
-from backend.utils import save_batch_to_wav
+from utils import save_batch_to_wav
 import numpy as np
-from backend.config import STEP, TEMP_FILE_PATH
+from config import STEP, TEMP_FILE_PATH
 from pyannote.audio import Pipeline
 from clients.Client import Client
 

@@ -1,11 +1,11 @@
 import logging
 
 from diart import OnlineSpeakerDiarization
-from backend.config import DIARIZATION_PIPELINE_CONFIG
+from config import DIARIZATION_PIPELINE_CONFIG
 import asyncio
 import diart.operators as dops
 import rx.operators as ops
-from backend.utils import concat, jsonify_transcription, StreamingSocketAudioSource
+from utils import concat, jsonify_transcription, StreamingSocketAudioSource
 import traceback
 import threading
 from clients.Client import Client

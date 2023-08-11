@@ -3,9 +3,9 @@ from clients.RealTimeClient import RealTimeClient
 from clients.SequentialClient import SequentialClient
 from enum import Enum
 
-from backend.transcription.whisper_transcriber import WhisperTranscriber
-from backend.utils import format_whisper_model_name
-from backend.config import WhisperModelSize, LANGUAGE_MAPPING
+from transcription.whisper_transcriber import WhisperTranscriber
+from utils import format_whisper_model_name
+from config import WhisperModelSize, LANGUAGE_MAPPING
 
 
 class TranscriptionMethod(Enum):
