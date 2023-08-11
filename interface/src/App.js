@@ -114,7 +114,7 @@ const App = ({ classes }) => {
         };
 
         // Create a new WebSocket connection.
-        socketRef.current = new io.connect("http://0.0.0.0:8000", {
+        socketRef.current = new io.connect("http://localhost:8000", {
           transports: ["websocket"],
           query: config,
         });
