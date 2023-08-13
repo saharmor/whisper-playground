@@ -22,6 +22,18 @@ https://github.com/ethanzrd/whisper-playground/assets/79014814/44a9bcf0-e374-4c7
 5. Run the backend `cd backend && python server.py`
 6. In a different terminal, run the React frontend `cd interface && yarn start`
 
+### Access to Pyannote Models
+
+This repository uses libraries based on pyannote.audio models, these models are stored in the [huggingface](https://huggingface.co/) hub. You must accept their user conditions before using them.
+
+Note: If you don't have a huggingface account, you need to create one.
+
+1. Accept terms for the [`pyannote/segmentation`](https://huggingface.co/pyannote/segmentation) model
+2. Accept terms for the [`pyannote/embedding`](https://huggingface.co/pyannote/embedding) model
+3. Accept terms for the [`pyannote/speaker-diarization`](https://huggingface.co/pyannote/speaker-diarization) model
+4. Install [huggingface-cli](https://huggingface.co/docs/huggingface_hub/quick-start#install-the-hub-library) and [log in](https://huggingface.co/docs/huggingface_hub/quick-start#login) with your user access token (can be found in Settings -> Access Tokens)
+
+
 # Parameters
 
 - Model Size: Choose the model size, from tiny to large-v2.
