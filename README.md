@@ -50,7 +50,7 @@ Note: If you don't have a huggingface account, you need to create one.
 
 1. [In the sequential mode, there may be uncontrolled speaker swapping.](https://github.com/saharmor/whisper-playground/issues/27)
 2. [In real-time mode, audio data not meeting the transcription timeout won't be transcribed.](https://github.com/saharmor/whisper-playground/issues/28)
-3. [Speechless batches will cause errors.](https://github.com/saharmor/whisper-playground/issues/25)
+3. [Speechless batches may cause hallucintions.](https://github.com/saharmor/whisper-playground/issues/25)
 
 This repository hasn't been tested for all languages; please create an issue if you encounter any problems.
 
