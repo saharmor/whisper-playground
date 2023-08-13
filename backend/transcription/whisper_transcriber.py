@@ -71,8 +71,8 @@ class WhisperTranscriber:
             if aligned_transcription['text'] == "":
                 logging.info("Empty aligned transcription, defaulting to original")
                 return self.current_transcription
-        except ValueError:
-            logging.info("Transcription alignment failed, defaulting to original")
+        except Exception as e:
+            logging.info(f"Transcription alignment failed, defaulting to original. Error: {e}")
             return self.current_transcription
 
         return aligned_transcription

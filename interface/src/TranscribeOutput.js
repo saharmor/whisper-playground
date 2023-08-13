@@ -23,7 +23,7 @@ const TranscribeOutput = ({ data, classes }) => {
       const text = item.text;
       let speakerName = "";
 
-      if (speaker === -1) {
+      if (speaker === "unknown") {
         speakerName = "Unknown Speaker";
       } else {
         speakerName = `Speaker ${speaker + 1}`;
