@@ -6,13 +6,9 @@
   <h6 align="center">Live demo out soon!</h6>
 </div>
 
-![visitors](https://visitor-badge.glitch.me/badge?page_id=saharmor.whisper-playground&left_color=green&right_color=red)
-
-
+[![visitors](https://hits.sh/github.com/saharmor/whisper-playground.svg?style=plastic&label=visitors&extraCount=55288)](https://hits.sh/github.com/saharmor/whisper-playground/)
 
 https://github.com/ethanzrd/whisper-playground/assets/79014814/44a9bcf0-e374-4c71-8189-1d99824fbdc5
-
-
 
 # Setup
 1. Have [`Conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and [`Yarn`](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable) on your device 
@@ -24,9 +20,8 @@ https://github.com/ethanzrd/whisper-playground/assets/79014814/44a9bcf0-e374-4c7
 
 ### Access to Pyannote Models
 
-This repository uses libraries based on pyannote.audio models, these models are stored in the [huggingface](https://huggingface.co/) hub. You must accept their user conditions before using them.
-
-Note: If you don't have a huggingface account, you need to create one.
+This repository uses libraries based on pyannote.audio models, which are stored in the Hugging Face Hub. You must accept their terms of use before using them.
+Note: You need to have a Hugging Face account to use pyannote
 
 1. Accept terms for the [`pyannote/segmentation`](https://huggingface.co/pyannote/segmentation) model
 2. Accept terms for the [`pyannote/embedding`](https://huggingface.co/pyannote/embedding) model
@@ -39,7 +34,7 @@ Note: If you don't have a huggingface account, you need to create one.
 - Model Size: Choose the model size, from tiny to large-v2.
 - Language: Select the language you will be speaking in.
 - Transcription Timeout: Set the number of seconds the application will wait before transcribing the current audio data.
-- Beam Size: Adjust the amount of transcriptions generated and considered, which affects accuracy and transcription generation time.
+- Beam Size: Adjust the number of transcriptions generated and considered, which affects accuracy and transcription generation time.
 - Transcription Method: Choose "real-time" for real-time diarization and transcriptions, or "sequential" for periodic transcriptions with more context.
 
 ## Troubleshooting
@@ -50,7 +45,7 @@ Note: If you don't have a huggingface account, you need to create one.
 
 1. [In the sequential mode, there may be uncontrolled speaker swapping.](https://github.com/saharmor/whisper-playground/issues/27)
 2. [In real-time mode, audio data not meeting the transcription timeout won't be transcribed.](https://github.com/saharmor/whisper-playground/issues/28)
-3. [Speechless batches may cause hallucintions.](https://github.com/saharmor/whisper-playground/issues/25)
+3. [Speechless batches may cause hallucinations.](https://github.com/saharmor/whisper-playground/issues/25)
 
 This repository hasn't been tested for all languages; please create an issue if you encounter any problems.
 
