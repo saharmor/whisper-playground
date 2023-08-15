@@ -1,7 +1,6 @@
 import logging
-
 from diart import OnlineSpeakerDiarization
-from config import DIARIZATION_PIPELINE_CONFIG
+from config import DIARIZATION_PIPELINE_CONFIG, ClientState
 import asyncio
 import diart.operators as dops
 import rx.operators as ops
@@ -13,8 +12,8 @@ from clients.Client import Client
 
 class RealTimeClient(Client):
 
-    def __init__(self, sid, socket, transcriber, transcription_timeout):
-        super().__init__(sid, socket, transcriber, transcription_timeout)
+    def __init__(self, sid, socket, config):
+        super().__init__(sid, socket, config)
         self.pipeline_config = DIARIZATION_PIPELINE_CONFIG
         self.diarization_pipeline = OnlineSpeakerDiarization(self.pipeline_config)
         self.chunk_receiving_thread = None
@@ -28,7 +27,7 @@ class RealTimeClient(Client):
         await self.socket.emit("whisperingStarted")
         logging.info("Stream start signaled to client")
 
-    def receive_chunk(self, chunk):
+    def receive_chunk(self, chunk: str):
         self.source.receive_chunk(chunk)
 
     def complete_stream(self):
@@ -38,7 +37,7 @@ class RealTimeClient(Client):
     def receive_chunks(self):
         logging.info("New chunks handler started")
         while True:
-            if self.disconnected:
+            if self.state == ClientState.DISCONNECTED:
                 logging.info("Client disconnected, ending transcription...")
                 self.complete_stream()
                 return
@@ -47,7 +46,7 @@ class RealTimeClient(Client):
                 # not a heavy operation but a blocking one during pipeline execution, shouldn't block the main thread thanks to threading
                 self.source.receive_chunk(current_chunk)
             else:
-                if self.ending_stream:
+                if self.state == ClientState.ENDING_STREAM:
                     logging.info("No more chunks, preparing for a final transcription...")
                     self.complete_stream()
                     return

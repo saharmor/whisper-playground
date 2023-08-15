@@ -1,8 +1,9 @@
 import logging
 import asyncio
 import threading
-from clients.utils import initialize_client
+from clients.utils import get_client_class
 from utils import cleanup
+from config import ClientState
 
 
 class ClientManager:
@@ -11,8 +12,9 @@ class ClientManager:
         self.clients = {}
 
     async def create_new_client(self, sid, sio, config):
-        self.clients[sid] = "initializing"
-        new_client = initialize_client(sid, sio, config)
+        new_client = get_client_class(config)(sid, sio, config)
+        self.clients[sid] = new_client
+        new_client.initialize_client()
         if self.clients.get(sid):
             self.clients[sid] = new_client
             await new_client.start_transcribing()
@@ -23,9 +25,6 @@ class ClientManager:
         if not self.clients:
             if sid not in self.clients.keys():
                 threading.Thread(target=asyncio.run, args=(self.create_new_client(sid, sio, config),)).start()
-            else:
-                logging.warning("A streaming client tried to initiate another stream")
-                await sio.emit("clientAlreadyStreaming")
         else:
             logging.warning("A new client tried to start streaming when there is already a client streaming")
             await sio.emit("noMoreClientsAllowed")
@@ -48,12 +47,10 @@ class ClientManager:
     def disconnect_from_stream(self, sid):
         if sid in self.clients.keys():
             client = self.clients[sid]
-            cleanup_needed = False
-            if client != "initializing":
-                client.handle_disconnection()
-                cleanup_needed = client.cleanup_needed
-                # No error if client is still not an object, it won't get to that point
-            if client == "initializing" or not client.is_ending_stream():
+            client.handle_disconnection()
+            cleanup_needed = client.cleanup_needed
+            client_state = client.get_state()
+            if client_state == ClientState.NOT_INITIALIZED or not client_state == ClientState.ENDING_STREAM:
                 try:
                     self.clients.pop(sid)
                 except KeyError:

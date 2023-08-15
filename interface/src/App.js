@@ -146,12 +146,6 @@ const App = ({ classes }) => {
           };
         });
 
-        socketRef.current.on("clientAlreadyStreaming", () => {
-          stopOnError(
-            "You are already streaming, wait for the current stream to end"
-          );
-        });
-
         socketRef.current.on("noMoreClientsAllowed", () => {
           stopOnError("No more clients allowed, try again later");
         });
@@ -174,7 +168,9 @@ const App = ({ classes }) => {
 
   function stopRecording() {
     streamRef.current.getTracks().forEach((track) => track.stop());
-    audioContextRef.current.close();
+    if (audioContextRef.current !== null) {
+      audioContextRef.current.close();
+    }
   }
 
   function stopStream() {
