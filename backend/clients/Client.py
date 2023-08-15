@@ -1,7 +1,7 @@
 import logging
 from queue import Queue
-
-
+from silero_vad import silero_vad
+from diart.utils import decode_audio
 class Client:
 
     def __init__(self, sid, socket, transcriber, transcription_timeout):
@@ -42,7 +42,9 @@ class Client:
             logging.info("Transcription not sent, client disconnected")
 
     def handle_chunk(self, chunk):
-        self.audio_chunks.put(chunk)
+        speech_present, speech_confidence = silero_vad(decode_audio(chunk))
+        if speech_present:
+            self.audio_chunks.put(chunk)
         logging.debug("Chunk added")
 
     def is_ending_stream(self):

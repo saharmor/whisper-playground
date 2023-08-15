@@ -31,6 +31,8 @@ SPEAKER_MAPPING = {
     -1: "unknown"
 }
 
+SPEECH_CONFIDENCE_THRESHOLD = 0.3  # The minimal amount of confidence to determine speech presence in batch (e.g. 0.5 means 50% chance at minimum)
+
 SAMPLE_RATE = 16000
 NON_ENGLISH_SPECIFIC_MODELS = ["large", "large-v1", "large-v2"]  # Models that don't have an English-only version
 

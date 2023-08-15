@@ -89,9 +89,8 @@ class WhisperTranscriber:
         speaker_transcriptions = identify_speakers(transcription, diarization, time_shift)
         return speaker_transcriptions
 
-    def sequential_transcription(self, buffer, diarization):
+    def sequential_transcription(self, audio, diarization):
         # Step 1: Transcribe
-        audio = buffer.astype("float32").reshape(-1)
         transcription = self.transcribe(audio)
         # Step 2: Assign speakers
         diarizated_transcription = assign_speakers(transcription, diarization)

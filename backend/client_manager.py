@@ -17,7 +17,7 @@ class ClientManager:
             self.clients[sid] = new_client
             await new_client.start_transcribing()
         else:
-            logging.warning("Client removed before transcription could start")
+            logging.warning("Client removed before transcription could start, new client may connect")
 
     async def start_stream(self, sid, sio, config):
         if not self.clients:
@@ -48,21 +48,19 @@ class ClientManager:
     def disconnect_from_stream(self, sid):
         if sid in self.clients.keys():
             client = self.clients[sid]
-            if not client.disconnected:
+            cleanup_needed = False
+            if client != "initializing":
+                client.handle_disconnection()
                 cleanup_needed = client.cleanup_needed
-                if client != "initializing":
-                    client.handle_disconnection()
                 # No error if client is still not an object, it won't get to that point
-                if client == "initializing" or not client.is_ending_stream():
-                    try:
-                        self.clients.pop(sid)
-                    except KeyError:
-                        logging.warning("disconnected_from_stream attempted to remove an already removed client")
-                    logging.info("Disconnected client removed")
-                    if cleanup_needed:
-                        cleanup()
-            else:
-                logging.warning("Disconnecting client attempting to disconnect multiple times")
+            if client == "initializing" or not client.is_ending_stream():
+                try:
+                    self.clients.pop(sid)
+                except KeyError:
+                    logging.warning("disconnected_from_stream attempted to remove an already removed client")
+                logging.info("Disconnected client removed")
+            if cleanup_needed:
+                cleanup()
         else:
             logging.warning("A non-existent client tried to disconnect from the stream.")
 

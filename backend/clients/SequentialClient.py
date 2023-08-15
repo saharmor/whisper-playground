@@ -22,16 +22,19 @@ class SequentialClient(Client):
         await self.socket.emit("whisperingStarted")
         logging.info("Stream start signaled to client")
 
-    def get_diarization(self, waveform):
-        audio = waveform.astype("float32").reshape(-1)
+    def get_diarization(self, audio):
         save_batch_to_wav(audio, TEMP_FILE_PATH)
         diarization = self.diarization_pipeline(TEMP_FILE_PATH)
         return diarization
 
-    def transcribe_buffer(self, buffer):
-        diarization = self.get_diarization(buffer)
-        result = self.transcriber.sequential_transcription(buffer, diarization)
+    def transcribe_buffer(self, audio):
+        diarization = self.get_diarization(audio)
+        result = self.transcriber.sequential_transcription(audio, diarization)
         asyncio.run(self.send_transcription(result))
+
+    @staticmethod
+    def convert_buffer_to_audio(buffer):
+        return buffer.astype("float32").reshape(-1)
 
     @staticmethod
     def modify_buffer(chunk, buffer):
@@ -52,19 +55,21 @@ class SequentialClient(Client):
                 break
             if not self.ending_stream:
                 if chunk_counter >= batch_size:
-                    self.transcribe_buffer(buffer)
+                    buffer_audio = self.convert_buffer_to_audio(buffer)
+                    self.transcribe_buffer(buffer_audio)
                     chunk_counter = 0
+
                 if not self.audio_chunks.empty():
                     current_chunk = self.audio_chunks.get()
                     buffer = self.modify_buffer(current_chunk, buffer)
                     chunk_counter += 1
             else:
                 logging.info("Client is ending stream, preparing for a final transcription...")
-                chunk_counter = 0
                 while not self.audio_chunks.empty():
                     current_chunk = self.audio_chunks.get()
                     buffer = self.modify_buffer(current_chunk, buffer)
                     chunk_counter += 1
                 if chunk_counter > 0:
-                    self.transcribe_buffer(buffer)
-                    break
+                    buffer_audio = self.convert_buffer_to_audio(buffer)
+                    self.transcribe_buffer(buffer_audio)
+                break
