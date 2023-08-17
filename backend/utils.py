@@ -3,7 +3,8 @@ from pyannote.core import Annotation, SlidingWindowFeature, SlidingWindow
 from scipy.io import wavfile
 import os
 import shutil
-from config import SPEAKER_MAPPING, SAMPLE_RATE, TEMP_FILE_PATH
+from config import SPEAKER_MAPPING, SAMPLE_RATE, TEMP_FILE_PATH, WhisperModelSize, LANGUAGE_MAPPING, \
+    NON_ENGLISH_SPECIFIC_MODELS
 from diart.sources import AudioSource
 from diart.utils import decode_audio
 import logging
@@ -14,7 +15,7 @@ class StreamingSocketAudioSource(AudioSource):
         self.sample_rate = SAMPLE_RATE
         super().__init__(uri=sid, sample_rate=self.sample_rate)
 
-    def receive_chunk(self, chunk):
+    def receive_chunk(self, chunk: str):
         self.stream.on_next(decode_audio(chunk))
         logging.debug("Chunk received in stream")
 
@@ -55,15 +56,6 @@ def jsonify_transcription(transcription):
         result.append({"speaker": SPEAKER_MAPPING.get(speaker, speaker), "text": text, "start": start, "end": end})
 
     return result
-
-
-def format_whisper_model_name(model_name):
-    """
-    Format the model size name (tiny, small, large-v1, etc) to match the enum members in WhisperModelSize
-
-    Replaces dashes with underscores and makes the string uppercase
-    """
-    return model_name.replace("-", "_").upper()
 
 
 def reformat_chunk(chunk):
@@ -161,6 +153,30 @@ def delete_temp_folder(temp_folder_path):
             logging.warning(f"Error deleting temporary folder '{folder_name}': {e}")
     else:
         logging.info(f"Temporary folder '{folder_name}' does not exist.")
+
+
+def get_transcriber_information(config) -> (WhisperModelSize, str):
+    """
+    Extracts the information required for the transcriber's initialization from the client's config
+    The model size and the code of the language to transcribe
+    """
+    language = config.get("language", "english")
+    try:
+        language_code = LANGUAGE_MAPPING[language.lower()]
+    except KeyError:
+        logging.warning(f"Language {language} not supported, defaulting to English")
+        language_code = "en"
+    whisper_model_name = config.get("model", "small")
+    try:
+        whisper_model_size = WhisperModelSize(whisper_model_name)
+    except ValueError:
+        logging.warning(f"Invalid model size {whisper_model_name}, defaulting to small")
+        whisper_model_size = WhisperModelSize.SMALL
+    else:
+        if language_code == "en" and whisper_model_size not in NON_ENGLISH_SPECIFIC_MODELS:
+            modified_model_name = whisper_model_name + ".en"
+            whisper_model_size = WhisperModelSize(modified_model_name)
+    return whisper_model_size, language_code
 
 
 def cleanup(temp_path=TEMP_FILE_PATH):

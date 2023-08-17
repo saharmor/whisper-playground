@@ -31,19 +31,36 @@ SPEAKER_MAPPING = {
     -1: "unknown"
 }
 
+SPEECH_CONFIDENCE_THRESHOLD = 0.3  # The minimal amount of confidence to determine speech presence in batch (e.g. 0.5 means 50% chance at minimum)
+
 SAMPLE_RATE = 16000
-NON_ENGLISH_SPECIFIC_MODELS = ["large", "large-v1", "large-v2"]  # Models that don't have an English-only version
 
 TEMP_FILE_PATH = "temp/batch.wav"  # Path to the temporary file used for batch transcription in SequentialClient
 
 
+class ClientState(Enum):
+    NOT_INITIALIZED = "not_initialized"
+    INITIALIZED = "initialized"
+    ENDING_STREAM = "ending_stream"
+    DISCONNECTED = "disconnected"
+
+
 class WhisperModelSize(Enum):
     TINY = 'tiny'
+    TINY_ENGLISH = 'tiny.en'
+    BASE = 'base'
+    BASE_ENGLISH = 'base.en'
     SMALL = 'small'
+    SMALL_ENGLISH = 'small.en'
     MEDIUM = 'medium'
+    MEDIUM_ENGLISH = 'medium.en'
     LARGE_V1 = 'large-v1'
     LARGE_V2 = 'large-v2'
 
+
+NON_ENGLISH_SPECIFIC_MODELS = [WhisperModelSize.LARGE_V1, WhisperModelSize.LARGE_V2]  # Models that don't have an English-only version
+
+REQUIRED_AUDIO_TYPE = "float32"
 
 # Language code mapping
 LANGUAGE_MAPPING = {

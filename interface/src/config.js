@@ -5,7 +5,6 @@ export const WHISPER_MODEL_OPTIONS = [
   "base",
   "small",
   "medium",
-  "large",
   "large-v1",
   "large-v2",
 ];
