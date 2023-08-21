@@ -3,7 +3,7 @@
  <br/>
   <h2 align="center">Whisper Playground</h2>
   <h6 align="center">Instantly build real-time speech2text apps in 99 languages using faster-whisper, Diart, and Pyannote</h6>
-  <h6 align="center">Live demo out soon!</h6>
+  <h6 align="center"><a href="https://whisperui.monsterapi.ai">Try it via the online demo</a></h6>
 </div>
 
 [![visitors](https://hits.sh/github.com/saharmor/whisper-playground.svg?style=plastic&label=visitors&extraCount=55288)](https://hits.sh/github.com/saharmor/whisper-playground/)
