@@ -84,6 +84,7 @@ const App = ({ classes }) => {
   }
 
   const setErrorMessage = (errorMessage) => {
+    setMessage(null);
     setErrorMessages([errorMessage]);
   };
 
@@ -103,8 +104,8 @@ const App = ({ classes }) => {
   };
 
   function handleTranscribedData(data) {
+    if (!isStreamPending) setMessage(null);
     if (transcriptionMethod === "real-time") {
-      setMessage(null);
       setTranscribedData((prevData) => [...prevData, ...data]);
     } else if (transcriptionMethod === "sequential") {
       setTranscribedData(data);
@@ -135,6 +136,7 @@ const App = ({ classes }) => {
       errorMessages.push("Selection fields must not be empty");
     }
     if (errorMessages.length > 0) {
+      setMessage(null);
       setErrorMessages(errorMessages);
       return false;
     }
@@ -157,6 +159,29 @@ const App = ({ classes }) => {
         streamRef.current = s;
 
         setIsRecording(true);
+        audioContextRef.current = new (window.AudioContext ||
+          window.webkitAudioContext)({
+          sampleRate: MIC_SAMPLE_RATE,
+        });
+        var source = audioContextRef.current.createMediaStreamSource(
+          streamRef.current
+        );
+        var processor = audioContextRef.current.createScriptProcessor(
+          BLOCK_SIZE,
+          1,
+          1
+        );
+        source.connect(processor);
+        processor.connect(audioContextRef.current.destination);
+
+        processor.onaudioprocess = function (event) {
+          var data = event.inputBuffer.getChannelData(0);
+          setAudioData(new Float32Array(data));
+
+          if (socketRef.current !== null && !isStreamPending) {
+            socketRef.current.emit("audioChunk", b64encode(data));
+          }
+        };
 
         const config = {
           language: selectedLanguage,
@@ -166,7 +191,6 @@ const App = ({ classes }) => {
           transcriptionMethod: transcriptionMethod,
         };
 
-        // Create a new WebSocket connection.
         socketRef.current = new io.connect(BACKEND_ADDRESS, {
           transports: ["websocket"],
           query: config,
@@ -178,32 +202,14 @@ const App = ({ classes }) => {
         socketRef.current.on("whisperingStarted", function () {
           if (transcriptionMethod === "real-time") {
             setNewMessage(
-              `Note: The first transcription will start after ${calculateDelay()} seconds of detected speech. After that, new transcriptions will be generated every ${transcribeTimeout} seconds of spoken audio. Any silence is canceled out.`
+              `Transcription starts ${calculateDelay()} seconds after you start speaking.`
+            );
+          } else if (transcriptionMethod === "sequential") {
+            setNewMessage(
+              `Transcription starts ${transcribeTimeout} seconds after you start speaking.`
             );
           }
           setIsStreamPending(false);
-          setIsRecording(true);
-          audioContextRef.current = new (window.AudioContext ||
-            window.webkitAudioContext)({
-            sampleRate: MIC_SAMPLE_RATE,
-          });
-          var source = audioContextRef.current.createMediaStreamSource(
-            streamRef.current
-          );
-          var processor = audioContextRef.current.createScriptProcessor(
-            BLOCK_SIZE,
-            1,
-            1
-          );
-          source.connect(processor);
-          processor.connect(audioContextRef.current.destination);
-
-          processor.onaudioprocess = function (event) {
-            var data = event.inputBuffer.getChannelData(0);
-            setAudioData(new Float32Array(data));
-
-            socketRef.current.emit("audioChunk", b64encode(data));
-          };
         });
 
         socketRef.current.on("noMoreClientsAllowed", () => {

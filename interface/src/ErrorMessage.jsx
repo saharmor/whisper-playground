@@ -12,11 +12,11 @@ const useStyles = () => ({
   },
 });
 
-const ErrorMessage = ({ classes, message, setErrorMessage }) => {
+const ErrorMessage = ({ classes, messages, setErrorMessages }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
       // Automatically clear the error message after 5 seconds
-      setErrorMessage(null);
+      setErrorMessages(null);
     }, 5000);
 
     return () => {
@@ -25,8 +25,12 @@ const ErrorMessage = ({ classes, message, setErrorMessage }) => {
   }, []);
 
   return (
-    <div className={classes.errorPopup}>
-      <span>{message}</span>
+    <div>
+      {messages.map((message, index) => (
+        <div key={index} className={classes.errorPopup}>
+          {message}
+        </div>
+      ))}
     </div>
   );
 };
