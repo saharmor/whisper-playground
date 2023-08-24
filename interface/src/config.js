@@ -9,6 +9,7 @@ export const WHISPER_MODEL_OPTIONS = [
   "large-v2",
 ];
 export const TRANSCRIPTION_METHODS = ["real-time", "sequential"];
+export const BACKEND_ADDRESS = "http://localhost:8000";
 export const SUPPORTED_LANGUAGES = [
   "english",
   "chinese",

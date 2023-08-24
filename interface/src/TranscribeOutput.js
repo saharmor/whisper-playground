@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import withStyles from "@material-ui/core/styles/withStyles";
 import Typography from "@material-ui/core/Typography";
 
@@ -14,6 +14,16 @@ const useStyles = () => ({
 });
 
 const TranscribeOutput = ({ data, classes }) => {
+  const transcriptEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    transcriptEndRef.current.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [data]);
+
   function formatData(data) {
     let formattedText = "";
     let currentSpeaker = null;
@@ -60,6 +70,7 @@ const TranscribeOutput = ({ data, classes }) => {
           </Typography>
         </div>
       ))}
+      <div ref={transcriptEndRef}></div>
     </div>
   );
 };

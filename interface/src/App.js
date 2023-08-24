@@ -7,12 +7,14 @@ import "./App.css";
 import TranscribeOutput from "./TranscribeOutput";
 import SettingsSections from "./SettingsSection";
 import ErrorMessage from "./ErrorMessage";
+import Message from "./Message";
 import {
   MIC_SAMPLE_RATE,
   BLOCK_SIZE,
   WHISPER_MODEL_OPTIONS,
   TRANSCRIPTION_METHODS,
   SUPPORTED_LANGUAGES,
+  BACKEND_ADDRESS,
 } from "./config";
 import WaveformVisualizer from "./WaveformVisualizer";
 import io from "socket.io-client";
@@ -59,6 +61,7 @@ const App = ({ classes }) => {
   const [transcribeTimeout, setTranscribeTimeout] = useState(5);
   const [beamSize, setBeamSize] = useState(1);
   const [errorMessage, setErrorMessage] = useState(null);
+  const [message, setMessage] = useState(null);
   const [transcriptionMethod, setTranscriptionMethod] = useState("real-time");
 
   const socketRef = useRef(null);
@@ -88,8 +91,14 @@ const App = ({ classes }) => {
     }
   };
 
+  const setNewMessage = (newMessage) => {
+    setMessage(null);
+    setMessage(newMessage);
+  };
+
   function handleTranscribedData(data) {
     if (transcriptionMethod === "real-time") {
+      setMessage(null);
       setTranscribedData((prevData) => [...prevData, ...data]);
     } else if (transcriptionMethod === "sequential") {
       setTranscribedData(data);
@@ -114,13 +123,22 @@ const App = ({ classes }) => {
         };
 
         // Create a new WebSocket connection.
-        socketRef.current = new io.connect("http://localhost:8000", {
+        socketRef.current = new io.connect(BACKEND_ADDRESS, {
           transports: ["websocket"],
           query: config,
         });
 
+        setNewMessage("Connecting to server...");
+
         // When the WebSocket connection is open, start sending the audio data.
         socketRef.current.on("whisperingStarted", function () {
+          if (transcriptionMethod === "real-time") {
+            setNewMessage(
+              `Note: The first transcription will start after ${
+                transcribeTimeout * 2
+              } seconds of detected speech. After that, new transcriptions will be generated every ${transcribeTimeout} seconds of spoken audio. Any silence is canceled out.`
+            );
+          }
           setIsStreamPending(false);
           setIsRecording(true);
           audioContextRef.current = new (window.AudioContext ||
@@ -175,12 +193,14 @@ const App = ({ classes }) => {
 
   function stopStream() {
     setIsStreamPending(true);
+    setNewMessage("Ending stream, transcribing remaining audio data...");
     socketRef.current.emit("stopWhispering");
     stopRecording();
     setAudioData([]);
     socketRef.current.on("whisperingStopped", function () {
       setIsStreamPending(false);
       setIsRecording(false);
+      setNewMessage("Stream ended.");
       socketRef.current.disconnect();
     });
   }
@@ -219,6 +239,7 @@ const App = ({ classes }) => {
           setErrorMessage={setErrorMessage}
         />
       )}
+      {message && <Message message={message} />}
       <div className={classes.buttonsSection}>
         {!isRecording && (
           <Button
