@@ -15,6 +15,8 @@ import {
   TRANSCRIPTION_METHODS,
   SUPPORTED_LANGUAGES,
   BACKEND_ADDRESS,
+  STEP_SIZE,
+  INITIALIZATION_DURATION,
 } from "./config";
 import WaveformVisualizer from "./WaveformVisualizer";
 import io from "socket.io-client";
@@ -60,7 +62,7 @@ const App = ({ classes }) => {
   const [selectedModel, setSelectedModel] = useState("small");
   const [transcribeTimeout, setTranscribeTimeout] = useState(5);
   const [beamSize, setBeamSize] = useState(1);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessages, setErrorMessages] = useState(null);
   const [message, setMessage] = useState(null);
   const [transcriptionMethod, setTranscriptionMethod] = useState("real-time");
 
@@ -80,6 +82,10 @@ const App = ({ classes }) => {
     // Return the encoded string as a UTF-8 encoded string
     return decodeURIComponent(encoded);
   }
+
+  const setErrorMessage = (errorMessage) => {
+    setErrorMessages([errorMessage]);
+  };
 
   const stopOnError = (errorMessage) => {
     setErrorMessage(errorMessage);
@@ -105,7 +111,45 @@ const App = ({ classes }) => {
     }
   }
 
+  const validateConfig = () => {
+    const errorMessages = [];
+    if (beamSize < 1) {
+      errorMessages.push("Beam size must be equal to or larger than 1");
+    } else if (beamSize % 1 !== 0) {
+      errorMessages.push("Beam size must be a whole number");
+    }
+    if (transcribeTimeout < STEP_SIZE) {
+      errorMessages.push(
+        `Transcription timeout must be equal or larger than ${STEP_SIZE}`
+      );
+    }
+    let selectionFields = [
+      selectedModel,
+      selectedLanguage,
+      transcriptionMethod,
+    ];
+    let emptySelectionFieldExists = selectionFields.some(
+      (field) => field === null
+    );
+    if (emptySelectionFieldExists) {
+      errorMessages.push("Selection fields must not be empty");
+    }
+    if (errorMessages.length > 0) {
+      setErrorMessages(errorMessages);
+      return false;
+    }
+    return true;
+  };
+
+  const calculateDelay = () => {
+    const batch_size = Math.floor(transcribeTimeout / STEP_SIZE);
+    const delay = batch_size * STEP_SIZE - STEP_SIZE;
+    return delay + INITIALIZATION_DURATION;
+  };
+
   function startStream() {
+    const isConfigValid = validateConfig();
+    if (!isConfigValid) return;
     setIsStreamPending(true);
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -134,9 +178,7 @@ const App = ({ classes }) => {
         socketRef.current.on("whisperingStarted", function () {
           if (transcriptionMethod === "real-time") {
             setNewMessage(
-              `Note: The first transcription will start after ${
-                transcribeTimeout * 2
-              } seconds of detected speech. After that, new transcriptions will be generated every ${transcribeTimeout} seconds of spoken audio. Any silence is canceled out.`
+              `Note: The first transcription will start after ${calculateDelay()} seconds of detected speech. After that, new transcriptions will be generated every ${transcribeTimeout} seconds of spoken audio. Any silence is canceled out.`
             );
           }
           setIsStreamPending(false);
@@ -233,10 +275,10 @@ const App = ({ classes }) => {
           onMethodChange={setTranscriptionMethod}
         />
       </div>
-      {errorMessage && (
+      {errorMessages && (
         <ErrorMessage
-          message={errorMessage}
-          setErrorMessage={setErrorMessage}
+          messages={errorMessages}
+          setErrorMessages={setErrorMessages}
         />
       )}
       {message && <Message message={message} />}

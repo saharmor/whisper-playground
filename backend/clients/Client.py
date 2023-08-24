@@ -31,7 +31,7 @@ class Client:
             beam_size = 1
         self.transcriber = WhisperTranscriber(model_size=whisper_model_size, language_code=language_code,
                                               beam_size=beam_size)
-        self.transcription_timeout = int(self.config.get("transcribeTimeout", 5))
+        self.transcription_timeout = float(self.config.get("transcribeTimeout", 5))
         self.state = ClientState.INITIALIZED
 
     @abstractmethod
