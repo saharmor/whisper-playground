@@ -14,7 +14,7 @@ https://github.com/ethanzrd/whisper-playground/assets/79014814/44a9bcf0-e374-4c7
 1. Have [`Conda`](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) and [`Yarn`](https://classic.yarnpkg.com/lang/en/docs/install/#mac-stable) on your device 
 2. Clone or fork this repository
 3. Install the backend and frontend environment `sh install_playground.sh`
-4. Review config.py to make sure the transcription device and compute type match your setup
+4. Review config.py to make sure the transcription device and compute type match your setup. Review config.js to make sure it conforms to the backend config and that the backend address is correct.
 5. Run the backend `cd backend && python server.py`
 6. In a different terminal, run the React frontend `cd interface && yarn start`
 
