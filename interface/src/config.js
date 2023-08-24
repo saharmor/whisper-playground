@@ -9,6 +9,10 @@ export const WHISPER_MODEL_OPTIONS = [
   "large-v2",
 ];
 export const TRANSCRIPTION_METHODS = ["real-time", "sequential"];
+export const BACKEND_ADDRESS = "http://localhost:8000";
+export const STEP_SIZE = 0.5; // must conform to backend config
+export const INITIALIZATION_DURATION = 5; // the time it takes the diarization pipeline to initialize in the real-time mode, must conform to backend config
+export const DEFAULT_STATUS = "Ready for transcription."; // the status that will be displayed when no actions are taking place
 export const SUPPORTED_LANGUAGES = [
   "english",
   "chinese",

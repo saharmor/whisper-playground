@@ -7,12 +7,16 @@ import "./App.css";
 import TranscribeOutput from "./TranscribeOutput";
 import SettingsSections from "./SettingsSection";
 import ErrorMessage from "./ErrorMessage";
+import StatusMessage from "./StatusMessage";
 import {
   MIC_SAMPLE_RATE,
   BLOCK_SIZE,
   WHISPER_MODEL_OPTIONS,
   TRANSCRIPTION_METHODS,
   SUPPORTED_LANGUAGES,
+  BACKEND_ADDRESS,
+  STEP_SIZE,
+  INITIALIZATION_DURATION,
 } from "./config";
 import WaveformVisualizer from "./WaveformVisualizer";
 import io from "socket.io-client";
@@ -58,7 +62,8 @@ const App = ({ classes }) => {
   const [selectedModel, setSelectedModel] = useState("small");
   const [transcribeTimeout, setTranscribeTimeout] = useState(5);
   const [beamSize, setBeamSize] = useState(1);
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessages, setErrorMessages] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(null);
   const [transcriptionMethod, setTranscriptionMethod] = useState("real-time");
 
   const socketRef = useRef(null);
@@ -66,6 +71,8 @@ const App = ({ classes }) => {
   const audioContextRef = useRef(null);
 
   const streamRef = useRef(null);
+
+  const isStreamEndingRef = useRef(false);
 
   function b64encode(chunk) {
     // Convert the chunk array to a Float32Array
@@ -78,6 +85,11 @@ const App = ({ classes }) => {
     return decodeURIComponent(encoded);
   }
 
+  const setErrorMessage = (errorMessage) => {
+    setStatusMessage(null);
+    setErrorMessages([errorMessage]);
+  };
+
   const stopOnError = (errorMessage) => {
     setErrorMessage(errorMessage);
     stopRecording();
@@ -89,6 +101,7 @@ const App = ({ classes }) => {
   };
 
   function handleTranscribedData(data) {
+    if (!isStreamEndingRef.current) setStatusMessage("Transcribing...");
     if (transcriptionMethod === "real-time") {
       setTranscribedData((prevData) => [...prevData, ...data]);
     } else if (transcriptionMethod === "sequential") {
@@ -96,7 +109,46 @@ const App = ({ classes }) => {
     }
   }
 
+  const validateConfig = () => {
+    const errorMessages = [];
+    if (beamSize < 1) {
+      errorMessages.push("Beam size must be equal to or larger than 1");
+    } else if (beamSize % 1 !== 0) {
+      errorMessages.push("Beam size must be a whole number");
+    }
+    if (transcribeTimeout < STEP_SIZE) {
+      errorMessages.push(
+        `Transcription timeout must be equal or larger than ${STEP_SIZE}`
+      );
+    }
+    let selectionFields = [
+      selectedModel,
+      selectedLanguage,
+      transcriptionMethod,
+    ];
+    let emptySelectionFieldExists = selectionFields.some(
+      (field) => field === null
+    );
+    if (emptySelectionFieldExists) {
+      errorMessages.push("Selection fields must not be empty");
+    }
+    if (errorMessages.length > 0) {
+      setStatusMessage(null);
+      setErrorMessages(errorMessages);
+      return false;
+    }
+    return true;
+  };
+
+  const calculateDelay = () => {
+    const batch_size = Math.floor(transcribeTimeout / STEP_SIZE);
+    const delay = batch_size * STEP_SIZE - STEP_SIZE;
+    return delay + INITIALIZATION_DURATION;
+  };
+
   function startStream() {
+    const isConfigValid = validateConfig();
+    if (!isConfigValid) return;
     setIsStreamPending(true);
     navigator.mediaDevices
       .getUserMedia({ audio: true })
@@ -104,6 +156,29 @@ const App = ({ classes }) => {
         streamRef.current = s;
 
         setIsRecording(true);
+        audioContextRef.current = new (window.AudioContext ||
+          window.webkitAudioContext)({
+          sampleRate: MIC_SAMPLE_RATE,
+        });
+        var source = audioContextRef.current.createMediaStreamSource(
+          streamRef.current
+        );
+        var processor = audioContextRef.current.createScriptProcessor(
+          BLOCK_SIZE,
+          1,
+          1
+        );
+        source.connect(processor);
+        processor.connect(audioContextRef.current.destination);
+
+        processor.onaudioprocess = function (event) {
+          var data = event.inputBuffer.getChannelData(0);
+          setAudioData(new Float32Array(data));
+
+          if (socketRef.current !== null && !isStreamPending) {
+            socketRef.current.emit("audioChunk", b64encode(data));
+          }
+        };
 
         const config = {
           language: selectedLanguage,
@@ -113,37 +188,25 @@ const App = ({ classes }) => {
           transcriptionMethod: transcriptionMethod,
         };
 
-        // Create a new WebSocket connection.
-        socketRef.current = new io.connect("http://localhost:8000", {
+        socketRef.current = new io.connect(BACKEND_ADDRESS, {
           transports: ["websocket"],
           query: config,
         });
 
+        setStatusMessage("Connecting to server...");
+
         // When the WebSocket connection is open, start sending the audio data.
         socketRef.current.on("whisperingStarted", function () {
+          if (transcriptionMethod === "real-time") {
+            setStatusMessage(
+              `Transcription starts ${calculateDelay()} seconds after you start speaking.`
+            );
+          } else if (transcriptionMethod === "sequential") {
+            setStatusMessage(
+              `Transcription starts ${transcribeTimeout} seconds after you start speaking.`
+            );
+          }
           setIsStreamPending(false);
-          setIsRecording(true);
-          audioContextRef.current = new (window.AudioContext ||
-            window.webkitAudioContext)({
-            sampleRate: MIC_SAMPLE_RATE,
-          });
-          var source = audioContextRef.current.createMediaStreamSource(
-            streamRef.current
-          );
-          var processor = audioContextRef.current.createScriptProcessor(
-            BLOCK_SIZE,
-            1,
-            1
-          );
-          source.connect(processor);
-          processor.connect(audioContextRef.current.destination);
-
-          processor.onaudioprocess = function (event) {
-            var data = event.inputBuffer.getChannelData(0);
-            setAudioData(new Float32Array(data));
-
-            socketRef.current.emit("audioChunk", b64encode(data));
-          };
         });
 
         socketRef.current.on("noMoreClientsAllowed", () => {
@@ -175,12 +238,15 @@ const App = ({ classes }) => {
 
   function stopStream() {
     setIsStreamPending(true);
+    setStatusMessage("Ending stream, transcribing remaining audio data...");
+    isStreamEndingRef.current = true;
     socketRef.current.emit("stopWhispering");
     stopRecording();
     setAudioData([]);
     socketRef.current.on("whisperingStopped", function () {
       setIsStreamPending(false);
       setIsRecording(false);
+      setStatusMessage("Stream ended.");
       socketRef.current.disconnect();
     });
   }
@@ -213,12 +279,13 @@ const App = ({ classes }) => {
           onMethodChange={setTranscriptionMethod}
         />
       </div>
-      {errorMessage && (
+      {errorMessages && (
         <ErrorMessage
-          message={errorMessage}
-          setErrorMessage={setErrorMessage}
+          messages={errorMessages}
+          setErrorMessages={setErrorMessages}
         />
       )}
+      <StatusMessage statusMessage={statusMessage} />
       <div className={classes.buttonsSection}>
         {!isRecording && (
           <Button
