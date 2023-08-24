@@ -7,7 +7,7 @@ import "./App.css";
 import TranscribeOutput from "./TranscribeOutput";
 import SettingsSections from "./SettingsSection";
 import ErrorMessage from "./ErrorMessage";
-import Message from "./Message";
+import StatusMessage from "./StatusMessage";
 import {
   MIC_SAMPLE_RATE,
   BLOCK_SIZE,
@@ -63,7 +63,7 @@ const App = ({ classes }) => {
   const [transcribeTimeout, setTranscribeTimeout] = useState(5);
   const [beamSize, setBeamSize] = useState(1);
   const [errorMessages, setErrorMessages] = useState(null);
-  const [message, setMessage] = useState(null);
+  const [statusMessage, setStatusMessage] = useState(null);
   const [transcriptionMethod, setTranscriptionMethod] = useState("real-time");
 
   const socketRef = useRef(null);
@@ -71,6 +71,8 @@ const App = ({ classes }) => {
   const audioContextRef = useRef(null);
 
   const streamRef = useRef(null);
+
+  const isStreamEndingRef = useRef(false);
 
   function b64encode(chunk) {
     // Convert the chunk array to a Float32Array
@@ -84,7 +86,7 @@ const App = ({ classes }) => {
   }
 
   const setErrorMessage = (errorMessage) => {
-    setMessage(null);
+    setStatusMessage(null);
     setErrorMessages([errorMessage]);
   };
 
@@ -98,13 +100,8 @@ const App = ({ classes }) => {
     }
   };
 
-  const setNewMessage = (newMessage) => {
-    setMessage(null);
-    setMessage(newMessage);
-  };
-
   function handleTranscribedData(data) {
-    if (!isStreamPending) setMessage(null);
+    if (!isStreamEndingRef.current) setStatusMessage("Transcribing...");
     if (transcriptionMethod === "real-time") {
       setTranscribedData((prevData) => [...prevData, ...data]);
     } else if (transcriptionMethod === "sequential") {
@@ -136,7 +133,7 @@ const App = ({ classes }) => {
       errorMessages.push("Selection fields must not be empty");
     }
     if (errorMessages.length > 0) {
-      setMessage(null);
+      setStatusMessage(null);
       setErrorMessages(errorMessages);
       return false;
     }
@@ -196,16 +193,16 @@ const App = ({ classes }) => {
           query: config,
         });
 
-        setNewMessage("Connecting to server...");
+        setStatusMessage("Connecting to server...");
 
         // When the WebSocket connection is open, start sending the audio data.
         socketRef.current.on("whisperingStarted", function () {
           if (transcriptionMethod === "real-time") {
-            setNewMessage(
+            setStatusMessage(
               `Transcription starts ${calculateDelay()} seconds after you start speaking.`
             );
           } else if (transcriptionMethod === "sequential") {
-            setNewMessage(
+            setStatusMessage(
               `Transcription starts ${transcribeTimeout} seconds after you start speaking.`
             );
           }
@@ -241,14 +238,15 @@ const App = ({ classes }) => {
 
   function stopStream() {
     setIsStreamPending(true);
-    setNewMessage("Ending stream, transcribing remaining audio data...");
+    setStatusMessage("Ending stream, transcribing remaining audio data...");
+    isStreamEndingRef.current = true;
     socketRef.current.emit("stopWhispering");
     stopRecording();
     setAudioData([]);
     socketRef.current.on("whisperingStopped", function () {
       setIsStreamPending(false);
       setIsRecording(false);
-      setNewMessage("Stream ended.");
+      setStatusMessage("Stream ended.");
       socketRef.current.disconnect();
     });
   }
@@ -287,7 +285,7 @@ const App = ({ classes }) => {
           setErrorMessages={setErrorMessages}
         />
       )}
-      {message && <Message message={message} />}
+      <StatusMessage statusMessage={statusMessage} />
       <div className={classes.buttonsSection}>
         {!isRecording && (
           <Button
