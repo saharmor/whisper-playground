@@ -4,9 +4,18 @@
   <h2 align="center">Whisper Playground</h2>
   <h6 align="center">Instantly build real-time speech2text apps in 99 languages using faster-whisper, Diart, and Pyannote</h6>
   <h6 align="center"><a href="https://whisperui.monsterapi.ai">Try it via the online demo</a></h6>
+
+  <p>
+<a href="https://hits.sh/github.com/saharmor/whisper-playground/" target="_blank"><img src="https://hits.sh/github.com/saharmor/whisper-playground.svg?style=plastic&label=visitors&extraCount=55288" alt="visitors"></a>
+    <a href="https://www.linkedin.com/in/sahar-mor/" target="_blank"><img src="https://img.shields.io/badge/LinkedIn-Connect-blue" alt="LinkedIn"></a>
+<a href="https://x.com/theaievangelist" target="_blank"><img src="https://img.shields.io/twitter/follow/:theaievangelist" alt="X"></a>
+<a href="http://aitidbits.ai/" target="_blank"><img src="https://github.com/saharmor/saharmor.github.io/blob/main/images/ai%20tidbits%20logo.png?raw=true" alt="Stay updated on AI" width="20" height="20" style="vertical-align: middle;"> Stay updated on AI</a>
+
+</p>
+
 </div>
 
-[![visitors](https://hits.sh/github.com/saharmor/whisper-playground.svg?style=plastic&label=visitors&extraCount=55288)](https://hits.sh/github.com/saharmor/whisper-playground/)
+
 
 https://github.com/ethanzrd/whisper-playground/assets/79014814/44a9bcf0-e374-4c71-8189-1d99824fbdc5
 
