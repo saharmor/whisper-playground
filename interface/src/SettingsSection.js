@@ -6,9 +6,22 @@ import TextField from "@material-ui/core/TextField";
 import Autocomplete from "@material-ui/lab/Autocomplete";
 
 const SettingsSections = ({
+
+  // MonsterAPI States Distructure Start
+  transcriptionInterval,
+  settranscriptionInterval,
+  setLanguage,
+  language,
+  bestOf,
+  removeSilence,
+  setBestOf,
+  setRemoveSilence,
+
+  // MonsterAPI States Distructure End
   disabled,
   possibleLanguages,
   selectedLanguage,
+  transcription,
   transcribeTimeout,
   beamSize,
   onLanguageChange,
@@ -37,6 +50,23 @@ const SettingsSections = ({
     onMethodChange(event.target.value);
   }
 
+  function onTranscriptionIntervalChangeLocal(event) {
+    settranscriptionInterval(event.target.value);
+  }
+
+  function onBestofChangeLocal(event) {
+    setBestOf(event.target.value);
+  }
+
+  function onRemoveSilenceChangeLocal(event) {
+    setRemoveSilence(event.target.value);
+  }
+
+  function onLanguageChangeChangeLocal(newValue) {
+    setLanguage(selectedLanguage.find(lang => lang.code === newValue.code));
+  }
+  
+
   return (
     <Grid
       container
@@ -45,7 +75,7 @@ const SettingsSections = ({
       justifyContent="center"
       alignItems="center"
     >
-      <Grid item>
+      {/* <Grid item>
         <FormControl variant="standard" sx={{ m: 2, minWidth: 220 }}>
           <InputLabel id="model-select-label">Model size</InputLabel>
           <Select
@@ -63,29 +93,38 @@ const SettingsSections = ({
             })}
           </Select>
         </FormControl>
-      </Grid>
+      </Grid> */}
       <Grid item>
         <FormControl variant="standard" style={{ minWidth: 120 }}>
           <Autocomplete
             id="language-select"
             disableClearable
             options={possibleLanguages}
-            getOptionLabel={(option) => option}
+            getOptionLabel={(option) => option.name}
             disabled={disabled}
-            value={selectedLanguage}
+            value={language}
             onChange={(event, newValue) => {
-              onLanguageChange(newValue);
-            }}
+              onLanguageChangeChangeLocal(newValue);
+            }}            
             renderInput={(params) => <TextField {...params} label="Language" />}
           />
         </FormControl>
       </Grid>
       <Grid item>
         <TextField
-          label="Transcription Timeout"
+          label="Transcription Interval in Sec"
           type="number"
-          value={transcribeTimeout}
-          onChange={(event) => onTranscribeTimeoutChangedLocal(event)}
+          value={transcriptionInterval}
+          onChange={(event) => onTranscriptionIntervalChangeLocal(event)}
+          disabled={disabled}
+        />
+      </Grid>
+      <Grid item>
+        <TextField
+          label="bestOf"
+          type="number"
+          value={bestOf}
+          onChange={(event) => onBestofChangeLocal(event)}
           disabled={disabled}
         />
       </Grid>
@@ -98,7 +137,27 @@ const SettingsSections = ({
           disabled={disabled}
         />
       </Grid>
+
       <Grid item>
+        <FormControl variant="standard" sx={{ m: 2, minWidth: 220 }}>
+          <InputLabel id="model-select-label">Remove Silence</InputLabel>
+          <Select
+            labelId="model-select-label"
+            value={removeSilence}
+            onChange={(event) => onRemoveSilenceChangeLocal(event)}
+            disabled={disabled}
+          >
+            <MenuItem key={"true"} value={"true"}>
+              True
+            </MenuItem>
+            <MenuItem key={"false"} value={"false"}>
+              False
+            </MenuItem>
+          </Select>
+        </FormControl>
+      </Grid>
+
+      {/* <Grid item>
         <FormControl variant="standard" sx={{ m: 2, minWidth: 220 }}>
           <InputLabel id="model-select-label">Transcription Method</InputLabel>
           <Select
@@ -116,7 +175,7 @@ const SettingsSections = ({
             })}
           </Select>
         </FormControl>
-      </Grid>
+      </Grid> */}
     </Grid>
   );
 };
